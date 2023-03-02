@@ -128,7 +128,7 @@ struct FirstView: View {
         Button("Push") {
             // SomeModel needs to be mapped using
             // sceneAction(for:perform:) and
-            // the sceneAction() called in the root
+            // the sceneActionEnabled() called in the root
             // hierarchy.
             sceneAction(SomeModel())
         }
@@ -139,7 +139,7 @@ struct FirstView: View {
 To map the action it's necessary to call the sceneAction(for:perform:) method
 which will capture the action thrown in every place that it might be listened.
 
-⚠️ SceneAction environment is only available when sceneAction() method is
+⚠️ SceneAction environment is only available when sceneActionEnabled() method is
 called before.
 
 ```swift
@@ -152,14 +152,14 @@ struct ContentView: View {
         .sceneAction(for: SomeModel.self) {
             print("Action received: \($0)")
         }
-        // but, sceneAction is needed before 
+        // but, sceneActionEnabled is needed before 
         // somewhere in the application
-        .sceneAction()
+        .sceneActionEnabled()
     }
 }
 ```
 
-Suggestion: call sceneAction in App's body property.
+Suggestion: call sceneActionEnabled in App's body property.
 
 ### ViewModelConnection
 
