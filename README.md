@@ -63,8 +63,10 @@ struct ContentView: View {
 Using the NKNavigationStack replaces the NavigationPath with NavigationAction
 that allows developers to manipulate in a better way the current stacked views.
 
-⚠️ The offside of this implementation is the removal of Decode option that Apple
-offers to us.
+⚠️ The downside of this implementation is the removal of Decode option that Apple
+offers to us. But you can still implement your own version of NavigationStack
+with NavigationPath and use the NavigationKit without the NavigationAction 
+environment.
 
 ```swift
 struct FirstView: View {
