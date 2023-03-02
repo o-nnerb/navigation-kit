@@ -6,16 +6,35 @@
 //
 
 import SwiftUI
+import Combine
 
 public struct SceneAction {
 
-    private let _sceneAction: _SceneAction
+    private let seed = Seed()
 
-    init(_ _sceneAction: _SceneAction) {
-        self._sceneAction = _sceneAction
+    init() {}
+
+    public func callAsFunction<Action: Hashable>(_ action: Action) {
+        NotificationCenter.default.post(
+            name: .init("\(ObjectIdentifier(Action.self))"),
+            object: seed,
+            userInfo: ["action": action]
+        )
     }
 
-    public func callAsFunction<Item: Hashable>(_ item: Item) {
-        _sceneAction(.init(Item.self))(item)
+    func publisher<Action: Hashable>(for actionType: Action.Type) -> AnyPublisher<Action, Never> {
+        NotificationCenter.default.publisher(
+            for: .init("\(ObjectIdentifier(actionType))"),
+            object: seed
+        )
+        .flatMap { notification -> AnyPublisher<Action, Never> in
+            guard let action = notification.userInfo?["action"] as? Action else {
+                return Empty(outputType: Action.self, failureType: Never.self)
+                    .eraseToAnyPublisher()
+            }
+
+            return Just(action).eraseToAnyPublisher()
+        }
+        .eraseToAnyPublisher()
     }
 }
