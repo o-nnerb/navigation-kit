@@ -109,7 +109,7 @@ extension Closure: Equatable {
         lhs.seed === rhs.seed
     }
 
-    public static func ==<RightInput, RightOutput>(
+    public static func == <RightInput, RightOutput>(
         _ lhs: Closure<Input, Output>,
         _ rhs: Closure<RightInput, RightOutput>
     ) -> Bool {

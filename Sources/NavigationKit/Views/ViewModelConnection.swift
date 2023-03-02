@@ -31,8 +31,7 @@ public struct ViewModelConnection<Input, Content, ViewModel>: View where Input: 
         @ViewBuilder content: @escaping (ViewModel) -> Content
     ) where Input == UUID {
         self.init(
-            UUID(),
-            { _ in viewModel() },
+            UUID(), { _ in viewModel() },
             content: content
         )
     }

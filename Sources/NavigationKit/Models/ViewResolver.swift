@@ -19,4 +19,3 @@ public struct ViewResolver {
         _viewResolver(ObjectIdentifier(Item.self))(item)
     }
 }
-

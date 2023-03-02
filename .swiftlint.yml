@@ -1,0 +1,15 @@
+identifier_name:
+    allowed_symbols:
+        - _viewResolver
+    excluded:
+        - k
+        - id
+
+type_name:
+    allowed_symbols:
+        - _ViewResolver
+        - _NavigationStack
+
+function_parameter_count:
+  warning: 16
+  error: 32
