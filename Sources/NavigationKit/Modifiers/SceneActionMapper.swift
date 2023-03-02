@@ -34,36 +34,3 @@ extension View {
         modifier(SceneActionMapper(mapper: mapper))
     }
 }
-
-private struct ErrorAction: Hashable {}
-
-private struct ContentErrorAction: Hashable {}
-
-struct SceneActionMapper_Previews: PreviewProvider {
-
-    static var previews: some View {
-        ContentView()
-            .sceneActionMap(for: ErrorAction.self) { _ in
-                ContentErrorAction()
-            }
-            .attachSceneAction()
-    }
-}
-
-struct ContentView: View {
-
-    @State var receivedAction = false
-    @Environment(\.sceneAction) var sceneAction
-
-    var body: some View {
-        VStack {
-            Text(receivedAction ? "Sim" : "False")
-            Button("Press") {
-                sceneAction(ErrorAction())
-            }
-        }
-        .sceneAction(for: ContentErrorAction.self) { _ in
-            receivedAction = true
-        }
-    }
-}

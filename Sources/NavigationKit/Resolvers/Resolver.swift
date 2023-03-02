@@ -7,17 +7,6 @@
 
 import Foundation
 
-final class RegisterID: Hashable {
-
-    static func == (_ lhs: RegisterID, _ rhs: RegisterID) -> Bool {
-        lhs === rhs
-    }
-
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(ObjectIdentifier(self))
-    }
-}
-
 struct Resolver<Key: Hashable, Value> {
 
     private var table: [Key: Factory<Value>] = [:]
@@ -32,14 +21,14 @@ struct Resolver<Key: Hashable, Value> {
         return factory.value
     }
 
-    mutating func register(_ value: Value, forKey key: Key, with id: RegisterID) {
+    mutating func register(_ value: Value, forKey key: Key, with seed: Seed) {
         if let item = table[key] {
-            guard let itemID = item.id, itemID == id else {
+            guard item.seed == nil || item.seed == seed else {
                 print("[NavigationKit]", "Resolver will use the first object already registered")
                 return
             }
         }
 
-        table[key] = Factory(value, with: id)
+        table[key] = Factory(value, with: seed)
     }
 }

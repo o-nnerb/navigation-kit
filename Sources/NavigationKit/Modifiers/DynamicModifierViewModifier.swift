@@ -7,7 +7,25 @@
 
 import SwiftUI
 
+struct DynamicModifierViewModifier<Key>: ViewModifier {
+
+    @Environment(\.modifierResolver) var modifierResolver
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if let modifierResolver {
+            modifierResolver(ObjectIdentifier(Key.self))(AnyView(content))
+        } else {
+            content
+        }
+    }
+}
+
 extension View {
+
+    public func modifier<Item>(for type: Item.Type) -> some View {
+        modifier(DynamicModifierViewModifier<Item>())
+    }
 
     public func modifierResolver<Key, Modifier: ViewModifier>(
         for type: Key.Type,

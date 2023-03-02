@@ -29,7 +29,7 @@ extension EnvironmentValues {
 
 extension View {
 
-    public func attachSceneAction() -> some View {
+    public func sceneActionEnabled() -> some View {
         environment(\._sceneAction, .init())
     }
 }

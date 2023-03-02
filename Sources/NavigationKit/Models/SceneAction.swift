@@ -21,6 +21,9 @@ public struct SceneAction {
             userInfo: ["action": action]
         )
     }
+}
+
+extension SceneAction {
 
     func publisher<Action: Hashable>(for actionType: Action.Type) -> AnyPublisher<Action, Never> {
         NotificationCenter.default.publisher(

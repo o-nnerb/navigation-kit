@@ -18,7 +18,7 @@ struct ResolverModifier<Key: Hashable, Value>: ViewModifier {
     private let key: Key
     private let value: Value
 
-    @State var id = RegisterID()
+    @State var seed = Seed()
 
     init(
         keyPath: WritableKeyPath<EnvironmentValues, Resolver?>,
@@ -41,7 +41,7 @@ struct ResolverModifier<Key: Hashable, Value>: ViewModifier {
     func updatedResolver() -> Resolver? {
         var resolver = resolver ?? initClosure?()
 
-        resolver?.register(value, forKey: key, with: id)
+        resolver?.register(value, forKey: key, with: seed)
 
         return resolver
     }
