@@ -8,7 +8,7 @@
 import Foundation
 import Combine
 
-public struct SceneTransaction<Destination: Hashable> {
+public struct SceneTransaction<Destination> {
 
     private let id: UUID
     private let subject = PassthroughSubject<Destination, Never>()
@@ -35,7 +35,7 @@ extension SceneTransaction {
         subject.eraseToAnyPublisher()
     }
 
-    public func send(_ destination: Destination) {
+    public func callAsFunction(_ destination: Destination) {
         subject.send(destination)
     }
 }
