@@ -7,11 +7,9 @@
 
 import Foundation
 
-enum NavigationPerform {
-    case setItems([NavigationItem])
-    case removeIncluding(NavigationItem)
-    case removeUntil(NavigationItem)
-    case append(NavigationItem)
-    case removeLast(Int?)
-    case removeAll
+enum NavigationPerform<Item: Hashable>: Hashable {
+    case setItems([Item])
+    case removeIncluding(Item)
+    case removeUntil(Item)
+    case append(Item)
 }
