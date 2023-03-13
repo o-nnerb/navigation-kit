@@ -1,3 +1,8 @@
+[![Swift Compatibility](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fbrennobemoura%2Fnavigation-kit%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/brennobemoura/navigation-kit)
+[![Platform Compatibility](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fbrennobemoura%2Fnavigation-kit%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/brennobemoura/navigation-kit)
+[![Tests](https://github.com/brennobemoura/navigation-kit/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/brennobemoura/navigation-kit/actions/workflows/tests.yml)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/516f7228a532b73b5540/test_coverage)](https://codeclimate.com/github/brennobemoura/navigation-kit/test_coverage)
+
 # NavigationKit
 
 The NavigationKit is a library thats extends SwiftUI implementation for
