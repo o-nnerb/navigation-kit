@@ -12,7 +12,7 @@ private struct NavigationDestinationTransformerModifier<Item: Hashable>: ViewMod
 
     func body(content: Content) -> some View {
         content
-            .environment(\._navigationAction,  navigationAction.resolver(for: Item.self) {
+            .environment(\._navigationAction, navigationAction.resolver(for: Item.self) {
                 switch $0 {
                 case .append(let item):
                     let transformer = NavigationDestinationTransformer(.append)
