@@ -1,9 +1,6 @@
-//
-//  File.swift
-//  
-//
-//  Created by Brenno on 23/02/23.
-//
+/*
+ See LICENSE for this package's licensing information.
+*/
 
 import Foundation
 

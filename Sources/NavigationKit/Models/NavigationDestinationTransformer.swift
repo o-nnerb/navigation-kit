@@ -1,12 +1,10 @@
-//
-//  File.swift
-//  
-//
-//  Created by Brenno on 12/03/23.
-//
+/*
+ See LICENSE for this package's licensing information.
+*/
 
 import Foundation
 
+/// A type that transforms a navigation destination to a specific item.
 public struct NavigationDestinationTransformer {
 
     private let state: State
@@ -15,6 +13,9 @@ public struct NavigationDestinationTransformer {
         state = .init(action)
     }
 
+    /// Transforms the navigation destination for the specified item.
+    ///
+    /// - Parameter item: The item transformed.
     public func callAsFunction<Item: Hashable>(_ item: Item) {
         state.send(item)
     }

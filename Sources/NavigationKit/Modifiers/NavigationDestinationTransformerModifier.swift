@@ -1,9 +1,6 @@
-//
-//  File.swift
-//  
-//
-//  Created by Brenno on 12/03/23.
-//
+/*
+ See LICENSE for this package's licensing information.
+*/
 
 import SwiftUI
 
@@ -45,6 +42,46 @@ private struct NavigationDestinationTransformerModifier<Item: Hashable>: ViewMod
 
 extension View {
 
+    /**
+     A modifier that configures a navigation destination transformer for a specific type of `Item`.
+
+     This modifier can be used when you have a `UserView` that is associated with a `UserModel`
+     using `navigationDestination(for:destination:)`, but the type specified in the
+     `NavigationAction` is an `enum UserState` that contains a `case model(UserModel)`.
+
+     Using the `navigationDestinationTransformer(for:closure:)` method, you can transform
+     the `UserState` into a `UserModel`. This method allows you to provide a closure that takes a
+     `NavigationDestinationTransformer` and an `Item` (in this case, a `UserState`),
+     and returns `Void`.
+
+     Within this closure, you can extract the `UserModel` from the `UserState` and pass it to the
+     `NavigationDestinationTransformer`, which will then perform the action with the `UserModel`
+     which will call the `UserView` defined at `navigationDestination(for:destination:)`.
+
+     Example usage:
+
+     ```swift
+     navigationDestinationTransformer(for: UserState.self) { transformer, scene in
+         switch scene {
+         case .model(let userModel):
+             transformer(userModel)
+         default:
+             // The NavigationAction will be ignored and the
+             // current app navigation state unchanged
+             break
+         }
+     }
+     ```
+
+     - Parameters:
+        - itemType: The type of item associated with the transformer.
+        - closure: The closure that accepts a NavigationDestinationTransformer instance
+     and an item of the specified type. You can use the provided transformer to customize the
+     destination view associated with the item.
+
+     - Returns: A modified view with a navigation destination transformer configured for the
+     specified item type.
+     */
     public func navigationDestinationTransformer<Item: Hashable>(
         for itemType: Item.Type,
         closure: @escaping (NavigationDestinationTransformer, Item) -> Void

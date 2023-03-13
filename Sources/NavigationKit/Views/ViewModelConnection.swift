@@ -1,12 +1,28 @@
-//
-//  File.swift
-//  
-//
-//  Created by Brenno on 23/02/23.
-//
+/*
+ See LICENSE for this package's licensing information.
+*/
 
 import SwiftUI
 
+/**
+ A view model connection that takes an input value, a view model, and a content view to display.
+
+ This connection automatically handles the creation, update, and disposal of the view model based on changes to the input value.
+
+ ```swift
+ struct UserCoordinator: View {
+
+     // This needs to be Hashable
+     let scene: UserScene
+
+     var body: some View {
+         ViewModelConnection(scene, UserViewModel.init) { viewModel in
+             UserView(viewModel: viewModel)
+         }
+     }
+ }
+ ```
+ */
 @MainActor
 public struct ViewModelConnection<Input, Content, ViewModel>: View where Input: Hashable, Content: View {
 
@@ -16,6 +32,14 @@ public struct ViewModelConnection<Input, Content, ViewModel>: View where Input: 
     private let viewModel: @MainActor (Input) -> ViewModel
     private let content: (ViewModel) -> Content
 
+    /**
+     Initializes a new instance of the view model connection with the provided input, view model, and content.
+
+     - Parameters:
+        - input: The input value used to generate the view model.
+        - viewModel: The closure used to generate the view model.
+        - content: The closure used to generate the content view.
+     */
     public init(
         _ input: Input,
         _ viewModel: @MainActor @escaping (Input) -> ViewModel,
@@ -26,6 +50,15 @@ public struct ViewModelConnection<Input, Content, ViewModel>: View where Input: 
         self.content = content
     }
 
+    /**
+     Initializes a new instance of the view model connection with the provided view model and content.
+
+     This initializer is intended to be used when the input value is a `UUID`.
+
+     - Parameters:
+        - viewModel: The closure used to generate the view model.
+        - content: The closure used to generate the content view.
+     */
     public init(
         viewModel: @MainActor @escaping () -> ViewModel,
         @ViewBuilder content: @escaping (ViewModel) -> Content

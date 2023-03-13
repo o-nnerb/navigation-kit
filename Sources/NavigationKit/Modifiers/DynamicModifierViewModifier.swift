@@ -1,13 +1,10 @@
-//
-//  File.swift
-//  
-//
-//  Created by Brenno on 23/02/23.
-//
+/*
+ See LICENSE for this package's licensing information.
+*/
 
 import SwiftUI
 
-struct DynamicModifierViewModifier<Key>: ViewModifier {
+private struct DynamicModifierViewModifier<Key>: ViewModifier {
 
     @Environment(\.modifierResolver) var modifierResolver
 
@@ -23,10 +20,18 @@ struct DynamicModifierViewModifier<Key>: ViewModifier {
 
 extension View {
 
+    @available(macOS, deprecated, introduced: 9999, message: "This method needs a review")
+    @available(iOS, deprecated, introduced: 9999, message: "This method needs a review")
+    @available(tvOS, deprecated, introduced: 9999, message: "This method needs a review")
+    @available(watchOS, deprecated, introduced: 9999, message: "This method needs a review")
     public func modifier<Item>(for type: Item.Type) -> some View {
         modifier(DynamicModifierViewModifier<Item>())
     }
 
+    @available(macOS, deprecated, introduced: 9999, message: "This method needs a review")
+    @available(iOS, deprecated, introduced: 9999, message: "This method needs a review")
+    @available(tvOS, deprecated, introduced: 9999, message: "This method needs a review")
+    @available(watchOS, deprecated, introduced: 9999, message: "This method needs a review")
     public func modifierResolver<Key, Modifier: ViewModifier>(
         for type: Key.Type,
         _ modifier: @escaping () -> Modifier

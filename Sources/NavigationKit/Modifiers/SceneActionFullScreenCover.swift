@@ -1,9 +1,6 @@
-//
-//  File.swift
-//  
-//
-//  Created by Brenno on 23/02/23.
-//
+/*
+ See LICENSE for this package's licensing information.
+*/
 
 import SwiftUI
 
@@ -55,6 +52,13 @@ private extension SceneActionFullScreenCover {
 @MainActor
 extension View {
 
+    /**
+     Presents a full-screen cover when an action of the specified type is received.
+     - Parameters:
+        - actionType: The type of action to listen for.
+        - reducer: The reducer function that will be used to update the scene's state based on the action received.
+     - Returns: A view that will present a full-screen cover when the specified action is received.
+     */
     public func sceneActionFullScreenCover<Action: Hashable, Scene: Hashable>(
         for actionType: Action.Type,
         reducer: @escaping (Action) -> Scene
@@ -62,6 +66,11 @@ extension View {
         modifier(SceneActionFullScreenCover(reducer: reducer))
     }
 
+    /**
+     Presents a full-screen cover when an action of the specified type is received.
+     - Parameter actionType: The type of action to listen for.
+     - Returns: A view that will present a full-screen cover when the specified action is received.
+     */
     public func sceneActionFullScreenCover<Action: Hashable>(
         for actionType: Action.Type
     ) -> some View {

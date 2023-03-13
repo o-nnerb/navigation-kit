@@ -1,9 +1,6 @@
-//
-//  File.swift
-//
-//
-//  Created by Brenno on 02/03/23.
-//
+/*
+ See LICENSE for this package's licensing information.
+*/
 
 import SwiftUI
 import Combine
@@ -29,6 +26,14 @@ private struct SceneActionCompactMapper<Action: Hashable, NewAction: Hashable>: 
 
 extension View {
 
+    /**
+     Maps a scene action to a new action using a closure that returns an optional value.
+
+     - Parameters:
+        - actionType: The type of the original scene action.
+        - mapper: A closure that maps an original scene action to a new action.
+     - Returns: A view that maps an original scene action to a new action using the provided closure.
+     */
     public func sceneActionCompactMap<Action: Hashable, NewAction: Hashable>(
         for actionType: Action.Type,
         _ mapper: @escaping (Action) -> NewAction?

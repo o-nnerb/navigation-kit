@@ -1,13 +1,10 @@
-//
-//  File.swift
-//  
-//
-//  Created by Brenno on 02/03/23.
-//
+/*
+ See LICENSE for this package's licensing information.
+*/
 
 import SwiftUI
 
-private struct ViewStateModifier<Object: ObservableObject>: ViewModifier {
+private struct ViewStateModifier<Object: AnyObject>: ViewModifier {
 
     @State var viewState: ViewState = .inactive
 
@@ -55,6 +52,14 @@ extension ViewStateModifier {
 
 extension View {
 
+    /**
+     Sets the state of the view to active or inactive, based on the given binding.
+
+     - Parameter viewState: A binding to a `ViewState` value that determines
+     the state of the view.
+
+     - Returns: A new view that reflects the state of the `viewState` binding.
+     */
     public func viewState(_ viewState: Binding<ViewState>) -> some View {
         onAppear {
             viewState.wrappedValue = .active
@@ -64,7 +69,17 @@ extension View {
         }
     }
 
-    public func viewState<Object: ObservableObject>(
+    /**
+     Sets the state of the view to active or inactive, based on the given object's key path.
+
+     - Parameters:
+        - object: An object that conforms to `AnyObject`.
+        - keyPath: A key path that points to a `ViewState` value in the `object`.
+
+     - Returns: A new view that reflects the state of the `ViewState` value pointed to
+     by the `keyPath` in the `object`.
+     */
+    public func viewState<Object: AnyObject>(
         _ object: Object,
         keyPath: WritableKeyPath<Object, ViewState>
     ) -> some View {

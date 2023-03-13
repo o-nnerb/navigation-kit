@@ -17,6 +17,10 @@ let package = Package(
         .target(
             name: "NavigationKit",
             dependencies: []
+        ),
+        .testTarget(
+            name: "NavigationKitTests",
+            dependencies: ["NavigationKit"]
         )
     ]
 )

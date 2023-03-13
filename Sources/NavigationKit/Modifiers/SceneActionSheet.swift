@@ -1,9 +1,6 @@
-//
-//  File.swift
-//  
-//
-//  Created by Brenno on 23/02/23.
-//
+/*
+ See LICENSE for this package's licensing information.
+*/
 
 import SwiftUI
 
@@ -54,6 +51,15 @@ private extension SceneActionSheet {
 @MainActor
 extension View {
 
+    /**
+     Presents an action sheet for a given action type, and maps the selected action to a scene.
+
+     - Parameters:
+        - actionType: A type of action that will be presented in the action sheet.
+        - reducer: A closure that maps the selected action to a scene.
+
+     - Returns: A new view that presents an action sheet.
+     */
     public func sceneActionSheet<Action: Hashable, Scene: Hashable>(
         for actionType: Action.Type,
         reducer: @escaping (Action) -> Scene
@@ -61,6 +67,13 @@ extension View {
         modifier(SceneActionSheet(reducer: reducer))
     }
 
+    /**
+     Presents an action sheet for a given action type.
+
+     - Parameter actionType: A type of action that will be presented in the action sheet.
+
+     - Returns: A new view that presents an action sheet.
+     */
     public func sceneActionSheet<Action: Hashable>(
         for actionType: Action.Type
     ) -> some View {
