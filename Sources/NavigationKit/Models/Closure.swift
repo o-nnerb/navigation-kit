@@ -50,7 +50,7 @@ extension Closure where Input == Void {
     }
 }
 
-// swiftlint:disable identifier_name large_tuple
+// swiftlint:disable identifier_name function_parameter_count
 extension Closure {
 
     public func callAsFunction<P0, P1>(

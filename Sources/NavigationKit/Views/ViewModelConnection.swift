@@ -7,7 +7,8 @@ import SwiftUI
 /**
  A view model connection that takes an input value, a view model, and a content view to display.
 
- This connection automatically handles the creation, update, and disposal of the view model based on changes to the input value.
+ This connection automatically handles the creation, update, and disposal of the view model based
+ on changes to the input value.
 
  ```swift
  struct UserCoordinator: View {

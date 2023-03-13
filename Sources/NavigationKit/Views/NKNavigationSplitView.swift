@@ -7,7 +7,9 @@ import SwiftUI
 /**
  A view that displays a split view with a sidebar, content, and detail view.
 
- This view uses the `NavigationSplitView` implementation to actually display the split view. It provides multiple convenience initializers for creating different types of split views with varying configurations of sidebar, content, and detail views.
+ This view uses the `NavigationSplitView` implementation to actually display the split view.
+ It provides multiple convenience initializers for creating different types of split views with varying
+ configurations of sidebar, content, and detail views.
 
  This view uses the `NavigationStack` implementation for detail to actually manage the
  state and perform the navigation. It also sets the `navigationAction` environment value
