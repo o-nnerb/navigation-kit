@@ -42,7 +42,7 @@ private extension SceneActionPopover {
 
     struct PopoverModifier: ViewModifier {
 
-        @Environment(\._sceneAction) var sceneAction
+        @Environment(\.sceneAction) var sceneAction
         @Environment(\.viewResolver) var viewResolver
 
         @Binding var presented: Identified<Action>?
@@ -59,7 +59,7 @@ private extension SceneActionPopover {
                     arrowEdge: arrowEdge,
                     content: {
                         viewResolver(reducer($0.item))
-                            .environment(\._sceneAction, sceneAction)
+                            .environment(\.sceneAction, sceneAction)
                     }
                 )
         }

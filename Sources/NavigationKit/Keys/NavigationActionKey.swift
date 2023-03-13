@@ -15,6 +15,7 @@ extension EnvironmentValues {
         set { self[NavigationActionKey.self] = newValue }
     }
 
+    /// The navigation action associated with the environment.
     public var navigationAction: NavigationAction {
         guard let navigationAction = _navigationAction else {
             fatalError()

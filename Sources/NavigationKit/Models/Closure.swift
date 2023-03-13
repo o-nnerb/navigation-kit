@@ -4,6 +4,19 @@
 
 import Foundation
 
+/**
+ A closure that takes an input of type `Input` and produces an output of type `Output`.
+
+ Usage:
+
+ ```swift
+ let closure: Closure<Int, String> = .closure { input in
+    "The input is \(input)"
+ }
+
+ let output = closure(10) // output is "The input is 10"
+ ```
+ */
 public struct Closure<Input, Output> {
 
     private let closure: (Input) -> Output
@@ -14,6 +27,12 @@ public struct Closure<Input, Output> {
         self.seed = .init()
     }
 
+    /**
+     Calls the closure with the specified input and returns the output.
+
+     - Parameter input: The input value to pass to the closure.
+     - Returns: The output value produced by the closure.
+     */
     public func callAsFunction(_ input: Input) -> Output {
         closure(input)
     }
@@ -21,6 +40,11 @@ public struct Closure<Input, Output> {
 
 extension Closure where Input == Void {
 
+    /**
+     Calls the closure with no input and returns the output.
+
+     - Returns: The output value produced by the closure.
+     */
     public func callAsFunction() -> Output {
         closure(())
     }
