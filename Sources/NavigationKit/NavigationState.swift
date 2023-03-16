@@ -59,25 +59,25 @@ final class NavigationState: ObservableObject {
 // MARK: - NavigationStateProtocol
 
 extension NavigationState: NavigationStateProtocol {
-    
+
     func setItems<Item: Hashable>(_ items: [Item]) {
         for item in items {
             restore[item.hashValue] = { [weak self] in
                 self?.append(item)
             }
         }
-        
+
         self.hashes = items.map(\.hashValue)
         path = .init(items)
     }
-    
-    func setItems<Item: Hashable & Codable>(_ items: [Item])  {
+
+    func setItems<Item: Hashable & Codable>(_ items: [Item]) {
         for item in items {
             restore[item.hashValue] = { [weak self] in
                 self?.append(item)
             }
         }
-        
+
         self.hashes = items.map(\.hashValue)
         path = .init(items)
     }
@@ -86,16 +86,16 @@ extension NavigationState: NavigationStateProtocol {
         restore[item.hashValue] = { [weak self] in
             self?.append(item)
         }
-        
+
         hashes.append(item.hashValue)
         path.append(item)
     }
-    
+
     func append<Item: Hashable & Codable>(_ item: Item) {
         restore[item.hashValue] = { [weak self] in
             self?.append(item)
         }
-        
+
         hashes.append(item.hashValue)
         path.append(item)
     }
@@ -104,7 +104,7 @@ extension NavigationState: NavigationStateProtocol {
         guard let index = hashes.firstIndex(of: item.hashValue) else {
             return
         }
-        
+
         for hash in hashes[index ..< hashes.endIndex] {
             restore[hash] = nil
         }
@@ -118,7 +118,7 @@ extension NavigationState: NavigationStateProtocol {
         guard let index = hashes.firstIndex(of: item.hashValue) else {
             return
         }
-        
+
         for hash in hashes[index + 1 ..< hashes.endIndex] {
             restore[hash] = nil
         }
@@ -127,25 +127,25 @@ extension NavigationState: NavigationStateProtocol {
         hashes.removeLast(k)
         path.removeLast(k)
     }
-    
+
     func remove<Item: Hashable>(_ item: Item) {
         guard let index = hashes.firstIndex(of: item.hashValue) else {
             return
         }
-        
+
         let hash = hashes.remove(at: index)
         restore[hash] = nil
-        
+
         _path = .init()
-        
+
         isLock = true
         for hash in hashes {
             restore[hash]?()
         }
         isLock = false
-        
+
         var transaction = Transaction()
-        transaction.disablesAnimations = true        
+        transaction.disablesAnimations = true
         withTransaction(transaction) {
             path = _path
         }
@@ -168,7 +168,7 @@ extension NavigationState: NavigationStateProtocol {
         for hash in hashes[index ..< hashes.endIndex] {
             restore[hash] = nil
         }
-        
+
         hashes.removeLast(k)
         path.removeLast(k)
     }
@@ -176,7 +176,7 @@ extension NavigationState: NavigationStateProtocol {
     var count: Int {
         path.count
     }
-    
+
     var codable: NavigationAction.CodableRepresentation? {
         path.codable.map {
             .init(
@@ -185,7 +185,7 @@ extension NavigationState: NavigationStateProtocol {
             )
         }
     }
-    
+
     func contains<Item: Hashable>(_ item: Item) -> Bool {
         hashes.contains(item.hashValue)
     }

@@ -18,7 +18,7 @@ extension EnvironmentValues {
 }
 
 extension View {
-    
+
     public func sceneActionEnabled() -> some View {
         environment(\.sceneAction, SceneAction())
     }

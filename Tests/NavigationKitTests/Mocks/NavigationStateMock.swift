@@ -7,13 +7,13 @@ import SwiftUI
 @testable import NavigationKit
 
 class NavigationStateMock: NavigationStateProtocol {
-    
+
     private(set) var stack = [AnyHashable]()
-    
+
     func setItems<Item: Hashable>(_ items: [Item]) {
         stack = items
     }
-    
+
     func setItems<Item: Hashable & Codable>(_ items: [Item]) {
         stack = items
     }
@@ -21,7 +21,7 @@ class NavigationStateMock: NavigationStateProtocol {
     func append<Item: Hashable>(_ item: Item) {
         stack.append(item)
     }
-    
+
     func append<Item: Hashable & Codable>(_ item: Item) {
         stack.append(item)
     }
@@ -30,7 +30,7 @@ class NavigationStateMock: NavigationStateProtocol {
         guard let index = stack.firstIndex(of: item) else {
             return
         }
-        
+
         stack.removeLast(stack.count - index)
     }
 
@@ -38,7 +38,7 @@ class NavigationStateMock: NavigationStateProtocol {
         guard let index = stack.firstIndex(of: item) else {
             return
         }
-        
+
         stack.removeLast(stack.count - (index + 1))
     }
 
@@ -46,7 +46,7 @@ class NavigationStateMock: NavigationStateProtocol {
         guard let index = stack.firstIndex(of: item) else {
             return
         }
-        
+
         stack.remove(at: index)
     }
 
@@ -68,11 +68,11 @@ class NavigationStateMock: NavigationStateProtocol {
 
     var codable: NavigationAction.CodableRepresentation? {
         var navigationPath = NavigationPath()
-        
+
         for item in stack {
             navigationPath.append(item)
         }
-        
+
         return navigationPath.codable.map {
             .init(
                 navigationPath: $0,
@@ -80,7 +80,7 @@ class NavigationStateMock: NavigationStateProtocol {
             )
         }
     }
-    
+
     func contains<Item: Hashable>(_ item: Item) -> Bool {
         stack.contains(item)
     }

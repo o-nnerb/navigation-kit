@@ -19,7 +19,7 @@ struct PendingNavigationItems: Hashable {
 }
 
 extension PendingNavigationItems {
-    
+
     init(_ codableRepresentation: NavigationAction.CodableRepresentation) {
         self.init(
             path: .init(codableRepresentation.navigationPath),

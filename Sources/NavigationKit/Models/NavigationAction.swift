@@ -41,7 +41,7 @@ public struct NavigationAction {
 }
 
 extension NavigationAction {
-    
+
     /**
      Sets the items in the navigation stack to the specified array of items.
 
@@ -54,7 +54,7 @@ extension NavigationAction {
 
         state.setItems(items)
     }
-    
+
     /**
      Sets the items in the navigation stack to the specified array of `Codable` items.
 
@@ -67,7 +67,7 @@ extension NavigationAction {
 
         state.setItems(items)
     }
-    
+
     /**
      Appends the specified item to the end of the navigation stack.
 
@@ -80,7 +80,7 @@ extension NavigationAction {
 
         state.append(item)
     }
-    
+
     /**
      Appends the specified `Codable` item to the end of the navigation stack.
 
@@ -119,7 +119,7 @@ extension NavigationAction {
 
         state.removeUntil(item)
     }
-    
+
     /**
      Removes a specific item in the navigation stack.
 
@@ -129,7 +129,7 @@ extension NavigationAction {
         if performIfNeeded(for: .remove(item)) != nil {
             return
         }
-        
+
         state.remove(item)
     }
 
@@ -162,17 +162,17 @@ extension NavigationAction {
     public var count: Int {
         state.count
     }
-    
+
     /// A value that describes the contents of this path in a serializable format.
     public var codable: CodableRepresentation? {
         state.codable
     }
-    
+
     public func contains<Item: Hashable>(_ item: Item) -> Bool {
-        guard case .contains(let item)? = performIfNeeded(for: .contains(item)) else { 
-            return state.contains(item) 
+        guard case .contains(let item)? = performIfNeeded(for: .contains(item)) else {
+            return state.contains(item)
         }
-        
+
         return state.contains(item)
     }
 }

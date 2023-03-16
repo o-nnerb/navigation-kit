@@ -37,7 +37,7 @@ struct ResolverModifier<Key: Hashable, Value>: ViewModifier {
 }
 
 extension ResolverModifier {
-    
+
     struct Engine {
         let resolver: Resolver?
 
@@ -46,7 +46,7 @@ extension ResolverModifier {
         let value: Value
 
         let seed = Seed()
-        
+
         func build() -> Resolver? {
             var resolver = resolver ?? initClosure?()
 
@@ -55,7 +55,7 @@ extension ResolverModifier {
             return resolver
         }
     }
-    
+
     func makeEngine() -> Engine {
         Engine(
             resolver: resolver,

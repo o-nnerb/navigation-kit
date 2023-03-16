@@ -4,7 +4,7 @@
 
 import SwiftUI
 
-#if !os(watchOS)
+#if !os(watchOS) && !os(tvOS)
 @MainActor
 private struct SceneActionPopover<Action: Hashable, Scene: Hashable>: ViewModifier {
 

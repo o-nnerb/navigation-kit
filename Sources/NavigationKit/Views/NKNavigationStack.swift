@@ -48,9 +48,9 @@ public struct NKNavigationStack<Content: View>: View {
         )
         self.content = content()
     }
-    
+
     /**
-     Initializes a new instance of the navigation stack with the provided stack 
+     Initializes a new instance of the navigation stack with the provided stack
      representation and content.
 
      - Parameters:
