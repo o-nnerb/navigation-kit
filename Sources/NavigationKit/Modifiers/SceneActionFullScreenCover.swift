@@ -32,7 +32,7 @@ private extension SceneActionFullScreenCover {
 
     struct FullScreenCoverModifier: ViewModifier {
 
-        @Environment(\._sceneAction) var sceneAction
+        @Environment(\.sceneAction) var sceneAction
         @Environment(\.viewResolver) var viewResolver
 
         @Binding var presented: Identified<Action>?
@@ -43,7 +43,7 @@ private extension SceneActionFullScreenCover {
             content
                 .sheet(item: $presented) {
                     viewResolver(reducer($0.item))
-                        .environment(\._sceneAction, sceneAction)
+                        .environment(\.sceneAction, sceneAction)
                 }
         }
     }

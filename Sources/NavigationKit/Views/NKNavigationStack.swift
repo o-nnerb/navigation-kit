@@ -48,6 +48,22 @@ public struct NKNavigationStack<Content: View>: View {
         )
         self.content = content()
     }
+    
+    /**
+     Initializes a new instance of the navigation stack with the provided stack 
+     representation and content.
+
+     - Parameters:
+        - representation: The stack codable representation.
+        - content: The content view.
+     */
+    public init(
+        _ representation: NavigationAction.CodableRepresentation?,
+        @ViewBuilder content: () -> Content
+    ) {
+        self.pendingItems = representation.map { .init($0) }
+        self.content = content()
+    }
 
     public var body: some View {
         _NavigationStack(

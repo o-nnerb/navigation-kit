@@ -7,7 +7,15 @@ import XCTest
 
 class IdentifiedTests: XCTestCase {
 
-    func testHelloWorld() async throws {
-        XCTFail("Hello World")
+    func testIdentified_whenInstantiate_shouldBeItemEqualToID() {
+        // Given
+        let item = "Hello World"
+        
+        // When
+        let sut = Identified(item: item)
+        
+        // Then
+        XCTAssertEqual(sut.item, item)
+        XCTAssertEqual(sut.id, item.hashValue)
     }
 }

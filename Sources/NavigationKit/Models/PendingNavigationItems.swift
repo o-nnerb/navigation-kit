@@ -17,3 +17,13 @@ struct PendingNavigationItems: Hashable {
         lhs.hashes == rhs.hashes
     }
 }
+
+extension PendingNavigationItems {
+    
+    init(_ codableRepresentation: NavigationAction.CodableRepresentation) {
+        self.init(
+            path: .init(codableRepresentation.navigationPath),
+            hashes: codableRepresentation.hashes
+        )
+    }
+}

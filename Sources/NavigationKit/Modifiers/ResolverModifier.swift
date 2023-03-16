@@ -32,15 +32,37 @@ struct ResolverModifier<Key: Hashable, Value>: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .environment(keyPath, updatedResolver())
+            .environment(keyPath, makeEngine().build())
     }
+}
 
-    func updatedResolver() -> Resolver? {
-        var resolver = resolver ?? initClosure?()
+extension ResolverModifier {
+    
+    struct Engine {
+        let resolver: Resolver?
 
-        resolver?.register(value, forKey: key, with: seed)
+        let initClosure: (() -> Resolver)?
+        let key: Key
+        let value: Value
 
-        return resolver
+        let seed = Seed()
+        
+        func build() -> Resolver? {
+            var resolver = resolver ?? initClosure?()
+
+            resolver?.register(value, forKey: key, with: seed)
+
+            return resolver
+        }
+    }
+    
+    func makeEngine() -> Engine {
+        Engine(
+            resolver: resolver,
+            initClosure: initClosure,
+            key: key,
+            value: value
+        )
     }
 }
 

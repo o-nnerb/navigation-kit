@@ -4,7 +4,7 @@
 
 import SwiftUI
 
-private struct NavigationDestinationTransformerModifier<Item: Hashable>: ViewModifier {
+struct NavigationDestinationTransformerModifier<Item: Hashable>: ViewModifier {
 
     @Environment(\.navigationAction) var navigationAction
 
@@ -12,31 +12,80 @@ private struct NavigationDestinationTransformerModifier<Item: Hashable>: ViewMod
 
     func body(content: Content) -> some View {
         content
-            .environment(\._navigationAction, navigationAction.resolver(for: Item.self) {
+            .environment(\._navigationAction, makeEngine().build())
+    }
+}
+
+extension NavigationDestinationTransformerModifier {
+    
+    struct Engine {
+        
+        let navigationAction: NavigationAction
+        let closure: (NavigationDestinationTransformer, Item) -> Void
+        
+        private func perform<Item>(
+            _ type: Item.Type,
+            with transformer: NavigationDestinationTransformer
+        ) -> Item? {
+            transformer.perform(navigationAction) as? Item
+        }
+        
+        func build() -> NavigationAction {
+            navigationAction.resolver(for: Item.self) {
                 switch $0 {
                 case .append(let item):
                     let transformer = NavigationDestinationTransformer(.append)
                     closure(transformer, item)
-                    transformer.perform(navigationAction)
-
+                    return perform(AnyHashable.self, with: transformer).map {
+                        .append($0)
+                    }
+                    
                 case .setItems(let items):
                     let transformer = NavigationDestinationTransformer(.setItems)
                     for item in items {
                         closure(transformer, item)
                     }
-                    transformer.perform(navigationAction)
-
+                    return perform([AnyHashable].self, with: transformer).map {
+                        .setItems($0)
+                    }
+                    
                 case .removeUntil(let item):
                     let transformer = NavigationDestinationTransformer(.append)
                     closure(transformer, item)
-                    transformer.perform(navigationAction)
-
+                    return perform(AnyHashable.self, with: transformer).map {
+                        .removeUntil($0)
+                    }
+                    
                 case .removeIncluding(let item):
                     let transformer = NavigationDestinationTransformer(.append)
                     closure(transformer, item)
-                    transformer.perform(navigationAction)
+                    return perform(AnyHashable.self, with: transformer).map {
+                        .removeIncluding($0)
+                    }
+                    
+                case .remove(let item):
+                    let transformer = NavigationDestinationTransformer(.remove)
+                    closure(transformer, item)
+                    return perform(AnyHashable.self, with: transformer).map {
+                        .remove($0)
+                    }
+                    
+                case .contains(let item):
+                    let transformer = NavigationDestinationTransformer(.contains)
+                    closure(transformer, item)
+                    return perform(AnyHashable.self, with: transformer).map {
+                        .contains($0)
+                    }                    
                 }
-            })
+            }
+        }
+    }
+    
+    func makeEngine() -> Engine {
+        Engine(
+            navigationAction: navigationAction,
+            closure: closure
+        )
     }
 }
 

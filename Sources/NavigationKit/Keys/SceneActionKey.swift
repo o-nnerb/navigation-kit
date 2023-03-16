@@ -16,3 +16,10 @@ extension EnvironmentValues {
         set { self[SceneActionKey.self] = newValue }
     }
 }
+
+extension View {
+    
+    public func sceneActionEnabled() -> some View {
+        environment(\.sceneAction, SceneAction())
+    }
+}

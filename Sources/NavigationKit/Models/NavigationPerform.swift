@@ -9,4 +9,6 @@ enum NavigationPerform<Item: Hashable>: Hashable {
     case removeIncluding(Item)
     case removeUntil(Item)
     case append(Item)
+    case remove(Item)
+    case contains(Item)
 }
