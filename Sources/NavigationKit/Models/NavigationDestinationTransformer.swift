@@ -72,7 +72,7 @@ extension NavigationDestinationTransformer {
 
 extension NavigationDestinationTransformer.State {
 
-    func setItemsTransaction<Item: Hashable>(_ item: Item) {
+    private func setItemsTransaction<Item: Hashable>(_ item: Item) {
         transaction(
             for: [Item].self,
             transform: { ($0 ?? []) + [item] },
@@ -80,7 +80,7 @@ extension NavigationDestinationTransformer.State {
         )
     }
 
-    func setItemsTransaction<Item: Hashable & Codable>(_ item: Item) {
+    private func setItemsTransaction<Item: Hashable & Codable>(_ item: Item) {
         transaction(
             for: [Item].self,
             transform: { ($0 ?? []) + [item] },
@@ -88,7 +88,7 @@ extension NavigationDestinationTransformer.State {
         )
     }
 
-    func appendTransaction<Item: Hashable>(_ item: Item) {
+    private func appendTransaction<Item: Hashable>(_ item: Item) {
         transaction(
             for: Item.self,
             transform: { _ in item },
@@ -96,7 +96,7 @@ extension NavigationDestinationTransformer.State {
         )
     }
 
-    func appendTransaction<Item: Hashable & Codable>(_ item: Item) {
+    private func appendTransaction<Item: Hashable & Codable>(_ item: Item) {
         transaction(
             for: Item.self,
             transform: { _ in item },
@@ -104,7 +104,7 @@ extension NavigationDestinationTransformer.State {
         )
     }
 
-    func removeUntilTransaction<Item: Hashable>(_ item: Item) {
+    private func removeUntilTransaction<Item: Hashable>(_ item: Item) {
         transaction(
             for: Item.self,
             transform: { _ in item },
@@ -112,7 +112,7 @@ extension NavigationDestinationTransformer.State {
         )
     }
 
-    func removeIncludingTransaction<Item: Hashable>(_ item: Item) {
+    private func removeIncludingTransaction<Item: Hashable>(_ item: Item) {
         transaction(
             for: Item.self,
             transform: { _ in item },
@@ -120,7 +120,7 @@ extension NavigationDestinationTransformer.State {
         )
     }
 
-    func removeTransaction<Item: Hashable>(_ item: Item) {
+    private func removeTransaction<Item: Hashable>(_ item: Item) {
         transaction(
             for: Item.self,
             transform: { _ in item },
@@ -128,7 +128,7 @@ extension NavigationDestinationTransformer.State {
         )
     }
 
-    func containsTransaction<Item: Hashable>(_ item: Item) {
+    private func containsTransaction<Item: Hashable>(_ item: Item) {
         transaction(
             for: Item.self,
             transform: { _ in item },
