@@ -5,9 +5,9 @@
 import SwiftUI
 
 /**
- A view model connection that takes an input value, a view model, and a content view to display.
+ An object connection that takes an input value, an object, and a content view to display.
 
- This connection automatically handles the creation, update, and disposal of the view model based
+ This connection automatically handles the creation, update, and disposal of the object based
  on changes to the input value.
 
  ```swift
@@ -17,7 +17,7 @@ import SwiftUI
      let scene: UserScene
 
      var body: some View {
-         ViewModelConnection(scene, UserViewModel.init) { viewModel in
+         ObjectConnection(scene, UserViewModel.init) { viewModel in
              UserView(viewModel: viewModel)
          }
      }
@@ -25,7 +25,7 @@ import SwiftUI
  ```
  */
 @MainActor
-public struct ViewModelConnection<Input, Content, ViewModel>: View where Input: Hashable, Content: View {
+public struct ObjectConnection<Input, Content, ViewModel>: View where Input: Hashable, Content: View {
 
     @StateObject private var state = State()
 
@@ -79,7 +79,7 @@ public struct ViewModelConnection<Input, Content, ViewModel>: View where Input: 
     }
 }
 
-private extension ViewModelConnection {
+private extension ObjectConnection {
 
     @MainActor
     class State: ObservableObject {
