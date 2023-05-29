@@ -13,12 +13,10 @@ let package = Package(
         )
     ],
     dependencies: [
-        /* DocC
-         .package(
-             url: "https://github.com/apple/swift-docc-plugin.git",
-             from: "1.0.0"
-         )
-         DocC */
+        .package(
+            url: "https://github.com/apple/swift-docc-plugin.git",
+            from: "1.2.0"
+        )
     ],
     targets: [
         .target(

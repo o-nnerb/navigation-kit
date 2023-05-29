@@ -1,0 +1,38 @@
+name: Code Coverage
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'Package.swift'
+      - 'Sources/**'
+      - 'Tests/**'
+  pull_request:
+    paths:
+      - 'Package.swift'
+      - 'Sources/**'
+      - 'Tests/**'
+
+jobs:
+  code-coverage:
+    runs-on: macOS-13
+    steps:
+      - name: ⬇️ Get Sources
+        uses: actions/checkout@v3.5.2
+      
+      - name: 🛠️ Test Package
+        run: swift test --enable-code-coverage
+
+      - name: 🖨️ LLVM Coverage Format
+        run: |
+          xcrun llvm-cov export $(find .build -name NavigationKitPackageTests) \
+            -format="lcov" \
+            -instr-profile=$(find .build -name default.profdata) \
+            -ignore-filename-regex=".build|Tests" > NavigationKit.lcov
+
+      - name: 📦 Upload to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ${{ github.workspace }}/NavigationKit.lcov
+          verbose: true

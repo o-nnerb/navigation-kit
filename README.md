@@ -1,7 +1,6 @@
 [![Swift Compatibility](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fbrennobemoura%2Fnavigation-kit%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/brennobemoura/navigation-kit)
 [![Platform Compatibility](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fbrennobemoura%2Fnavigation-kit%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/brennobemoura/navigation-kit)
-[![Tests](https://github.com/brennobemoura/navigation-kit/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/brennobemoura/navigation-kit/actions/workflows/tests.yml)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/f4d5a7b2731287a26c47/test_coverage)](https://codeclimate.com/github/brennobemoura/navigation-kit/test_coverage)
+[![codecov](https://codecov.io/gh/brennobemoura/navigation-kit/branch/main/graph/badge.svg?token=C1KZ4624FC)](https://codecov.io/gh/brennobemoura/navigation-kit)
 
 # NavigationKit
 
@@ -39,7 +38,7 @@ let package = Package(
     targets: [
         .target(
             name: "MyPackage",
-            dependencies: ["RequestDL"]
+            dependencies: ["NavigationKit"]
         )
     ]
 )
