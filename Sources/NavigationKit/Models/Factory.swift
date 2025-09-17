@@ -4,7 +4,7 @@
 
 import Foundation
 
-struct Factory<Value> {
+struct Factory<Value: Sendable>: Sendable {
     weak var seed: Seed?
     let value: Value
 

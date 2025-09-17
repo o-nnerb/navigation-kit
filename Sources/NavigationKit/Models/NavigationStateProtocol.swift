@@ -4,7 +4,8 @@
 
 import Foundation
 
-protocol NavigationStateProtocol {
+@MainActor
+protocol NavigationStateProtocol: Sendable {
 
     func setItems<Item: Hashable>(_ items: [Item])
 

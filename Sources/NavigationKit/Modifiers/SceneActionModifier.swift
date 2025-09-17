@@ -8,9 +8,9 @@ private struct SceneActionModifier<Action: Hashable>: ViewModifier {
 
     @Environment(\.sceneAction) var sceneAction
 
-    private let action: (Action) -> Void
+    private let action: @MainActor (Action) -> Void
 
-    init(_ action: @escaping (Action) -> Void) {
+    init(_ action: @escaping @MainActor (Action) -> Void) {
         self.action = action
     }
 
@@ -39,7 +39,7 @@ extension View {
      */
     public func sceneAction<Action: Hashable>(
         for actionType: Action.Type,
-        perform action: @escaping (Action) -> Void
+        perform action: @escaping @MainActor (Action) -> Void
     ) -> some View {
         modifier(SceneActionModifier(action))
     }

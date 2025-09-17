@@ -4,7 +4,7 @@
 
 import Foundation
 
-final class Seed: Hashable {
+final class Seed: Hashable, @unchecked Sendable {
 
     static func == (_ lhs: Seed, _ rhs: Seed) -> Bool {
         lhs === rhs

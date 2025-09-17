@@ -5,7 +5,10 @@
 import SwiftUI
 
 private struct NavigationActionKey: EnvironmentKey {
-    static var defaultValue: NavigationAction?
+    
+    static var defaultValue: NavigationAction? {
+        nil
+    }
 }
 
 extension EnvironmentValues {

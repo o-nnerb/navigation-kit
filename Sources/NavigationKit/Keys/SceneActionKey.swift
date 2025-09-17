@@ -5,7 +5,9 @@
 import SwiftUI
 
 struct SceneActionKey: EnvironmentKey {
-    static var defaultValue = SceneAction()
+    static var defaultValue: SceneAction {
+        SceneAction()
+    }
 }
 
 extension EnvironmentValues {

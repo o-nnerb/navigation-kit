@@ -4,7 +4,7 @@
 
 import SwiftUI
 
-struct NavigationDestinationTransformerModifier<Item: Hashable>: ViewModifier {
+struct NavigationDestinationTransformerModifier<Item: Hashable & Sendable>: ViewModifier {
 
     @Environment(\.navigationAction) var navigationAction
 
@@ -18,16 +18,17 @@ struct NavigationDestinationTransformerModifier<Item: Hashable>: ViewModifier {
 
 extension NavigationDestinationTransformerModifier {
 
+    @MainActor
     struct Engine {
 
         let navigationAction: NavigationAction
         let closure: (NavigationDestinationTransformer, Item) -> Void
 
-        private func perform<Item>(
-            _ type: Item.Type,
+        private func perform<Destination>(
+            _ type: Destination.Type,
             with transformer: NavigationDestinationTransformer
-        ) -> Item? {
-            transformer.perform(navigationAction) as? Item
+        ) -> Destination? {
+            transformer.perform(navigationAction) as? Destination
         }
 
         func build() -> NavigationAction {
@@ -131,7 +132,7 @@ extension View {
      - Returns: A modified view with a navigation destination transformer configured for the
      specified item type.
      */
-    public func navigationDestinationTransformer<Item: Hashable>(
+    public func navigationDestinationTransformer<Item: Hashable & Sendable>(
         for itemType: Item.Type,
         closure: @escaping (NavigationDestinationTransformer, Item) -> Void
     ) -> some View {

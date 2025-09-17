@@ -22,14 +22,15 @@ import Combine
  }
  ```
  */
+@MainActor
 public struct NavigationAction {
 
     private let state: NavigationStateProtocol
-    private let resolver: [ObjectIdentifier: (AnyHashable) -> NavigationPerform<AnyHashable>?]
+    private let resolver: [ObjectIdentifier: @MainActor (AnyHashable) -> NavigationPerform<AnyHashable>?]
 
     private init(
         state: NavigationStateProtocol,
-        resolver: [ObjectIdentifier: (AnyHashable) -> NavigationPerform<AnyHashable>?]
+        resolver: [ObjectIdentifier: @MainActor (AnyHashable) -> NavigationPerform<AnyHashable>?]
     ) {
         self.state = state
         self.resolver = resolver
@@ -47,7 +48,7 @@ extension NavigationAction {
 
      - Parameter items: The items to set in the navigation stack.
      */
-    public func setItems<Item: Hashable>(_ items: [Item]) {
+    public func setItems<Item: Hashable & Sendable>(_ items: [Item]) {
         if performIfNeeded(for: .setItems(items)) != nil {
             return
         }
@@ -60,7 +61,7 @@ extension NavigationAction {
 
      - Parameter items: The items to set in the navigation stack.
      */
-    public func setItems<Item: Hashable & Codable>(_ items: [Item]) {
+    public func setItems<Item: Hashable & Codable & Sendable>(_ items: [Item]) {
         if performIfNeeded(for: .setItems(items)) != nil {
             return
         }
@@ -73,7 +74,7 @@ extension NavigationAction {
 
      - Parameter item: The item to append.
      */
-    public func append<Item: Hashable>(_ item: Item) {
+    public func append<Item: Hashable & Sendable>(_ item: Item) {
         if performIfNeeded(for: .append(item)) != nil {
             return
         }
@@ -86,7 +87,7 @@ extension NavigationAction {
 
      - Parameter item: The item to append.
      */
-    public func append<Item: Hashable & Codable>(_ item: Item) {
+    public func append<Item: Hashable & Codable & Sendable>(_ item: Item) {
         if performIfNeeded(for: .append(item)) != nil {
             return
         }
@@ -99,7 +100,7 @@ extension NavigationAction {
 
      - Parameter item: The item to remove.
      */
-    public func removeIncluding<Item: Hashable>(_ item: Item) {
+    public func removeIncluding<Item: Hashable & Sendable>(_ item: Item) {
         if performIfNeeded(for: .removeIncluding(item)) != nil {
             return
         }
@@ -112,7 +113,7 @@ extension NavigationAction {
 
      - Parameter item: The item to remove until.
      */
-    public func removeUntil<Item: Hashable>(_ item: Item) {
+    public func removeUntil<Item: Hashable & Sendable>(_ item: Item) {
         if performIfNeeded(for: .removeUntil(item)) != nil {
             return
         }
@@ -125,7 +126,7 @@ extension NavigationAction {
 
      - Parameter item: The item to remove.
      */
-    public func remove<Item: Hashable>(_ item: Item) {
+    public func remove<Item: Hashable & Sendable>(_ item: Item) {
         if performIfNeeded(for: .remove(item)) != nil {
             return
         }
@@ -168,7 +169,7 @@ extension NavigationAction {
         state.codable
     }
 
-    public func contains<Item: Hashable>(_ item: Item) -> Bool {
+    public func contains<Item: Hashable & Sendable>(_ item: Item) -> Bool {
         guard case .contains(let item)? = performIfNeeded(for: .contains(item)) else {
             return state.contains(item)
         }
@@ -181,7 +182,7 @@ extension NavigationAction {
 
     func resolver<Item: Hashable>(
         for itemType: Item.Type,
-        closure: @escaping (NavigationPerform<Item>) -> NavigationPerform<AnyHashable>?
+        closure: @escaping @MainActor (NavigationPerform<Item>) -> NavigationPerform<AnyHashable>?
     ) -> Self {
         guard resolver[.init(itemType)] == nil else {
             print("Resolver for \(itemType) already register")
@@ -206,7 +207,7 @@ extension NavigationAction {
 
 extension NavigationAction {
 
-    fileprivate func performIfNeeded<Item: Hashable>(
+    fileprivate func performIfNeeded<Item: Hashable & Sendable>(
         for action: NavigationPerform<Item>
     ) -> NavigationPerform<AnyHashable>? {
         guard let closure = resolver[.init(Item.self)] else {

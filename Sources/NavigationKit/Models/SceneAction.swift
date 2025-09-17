@@ -14,7 +14,7 @@ import Combine
  You can then call the `callAsFunction` method on an instance of `SceneAction` with an
  argument of type `Action` to perform the corresponding action available in the scene.
  */
-public struct SceneAction {
+public struct SceneAction: Sendable {
 
     private let seed = Seed()
 

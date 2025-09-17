@@ -4,7 +4,7 @@
 
 import SwiftUI
 
-struct ResolverModifier<Key: Hashable, Value>: ViewModifier {
+struct ResolverModifier<Key: Hashable & Sendable, Value: Sendable>: ViewModifier {
 
     typealias Resolver = NavigationKit.Resolver<Key, Value>
 
@@ -38,6 +38,7 @@ struct ResolverModifier<Key: Hashable, Value>: ViewModifier {
 
 extension ResolverModifier {
 
+    @MainActor
     struct Engine {
         let resolver: Resolver?
 
@@ -68,9 +69,9 @@ extension ResolverModifier {
 
 extension View {
 
-    func resolver<Key: Hashable, Value>(
+    func resolver<Key: Hashable & Sendable, Value>(
         keyPath: WritableKeyPath<EnvironmentValues, Resolver<Key, Value>?>,
-        init initClosure: (() -> Resolver<Key, Value>)?,
+        init initClosure: (@MainActor () -> Resolver<Key, Value>)?,
         key: Key,
         value: Value
     ) -> some View {

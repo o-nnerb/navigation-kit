@@ -4,6 +4,7 @@
 
 import Foundation
 
+@MainActor
 enum NavigationPerform<Item: Hashable>: Hashable {
     case setItems([Item])
     case removeIncluding(Item)

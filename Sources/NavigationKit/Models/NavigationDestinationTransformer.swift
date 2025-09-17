@@ -5,7 +5,8 @@
 import Foundation
 
 /// A type that transforms a navigation destination to a specific item.
-public struct NavigationDestinationTransformer {
+@MainActor
+public struct NavigationDestinationTransformer: Sendable {
 
     private let state: State
 
@@ -16,14 +17,14 @@ public struct NavigationDestinationTransformer {
     /// Transforms the navigation destination for the specified item.
     ///
     /// - Parameter item: The item transformed.
-    public func callAsFunction<Item: Hashable>(_ item: Item) {
+    public func callAsFunction<Item: Hashable & Sendable>(_ item: Item) {
         state.send(item)
     }
 
     /// Transforms the navigation destination for the specified `Codable` item.
     ///
     /// - Parameter item: The item transformed.
-    public func callAsFunction<Item: Hashable & Codable>(_ item: Item) {
+    public func callAsFunction<Item: Hashable & Codable & Sendable>(_ item: Item) {
         state.send(item)
     }
 
@@ -35,10 +36,11 @@ public struct NavigationDestinationTransformer {
 
 extension NavigationDestinationTransformer {
 
+    @MainActor
     fileprivate class State {
 
-        private var transformer: (() -> Any)?
-        private var executor: ((NavigationAction) -> Any)?
+        private var transformer: (@MainActor () -> Any)?
+        private var executor: (@MainActor (NavigationAction) -> Any)?
 
         private let action: NavigationDestinationTransformer.Action
 
@@ -48,8 +50,8 @@ extension NavigationDestinationTransformer {
 
         private func transaction<Item>(
             for type: Item.Type,
-            transform: @escaping (Item?) -> Item,
-            execute: @escaping (NavigationAction, Item) -> Void
+            transform: @escaping @MainActor (Item?) -> Item,
+            execute: @escaping @MainActor (NavigationAction, Item) -> Void
         ) {
             transformer = { [transformer] in
                 transform(transformer?() as? Item)
@@ -72,7 +74,7 @@ extension NavigationDestinationTransformer {
 
 extension NavigationDestinationTransformer.State {
 
-    private func setItemsTransaction<Item: Hashable>(_ item: Item) {
+    private func setItemsTransaction<Item: Hashable & Sendable>(_ item: Item) {
         transaction(
             for: [Item].self,
             transform: { ($0 ?? []) + [item] },
@@ -80,7 +82,7 @@ extension NavigationDestinationTransformer.State {
         )
     }
 
-    private func setItemsTransaction<Item: Hashable & Codable>(_ item: Item) {
+    private func setItemsTransaction<Item: Hashable & Codable & Sendable>(_ item: Item) {
         transaction(
             for: [Item].self,
             transform: { ($0 ?? []) + [item] },
@@ -88,7 +90,7 @@ extension NavigationDestinationTransformer.State {
         )
     }
 
-    private func appendTransaction<Item: Hashable>(_ item: Item) {
+    private func appendTransaction<Item: Hashable & Sendable>(_ item: Item) {
         transaction(
             for: Item.self,
             transform: { _ in item },
@@ -96,7 +98,7 @@ extension NavigationDestinationTransformer.State {
         )
     }
 
-    private func appendTransaction<Item: Hashable & Codable>(_ item: Item) {
+    private func appendTransaction<Item: Hashable & Codable & Sendable>(_ item: Item) {
         transaction(
             for: Item.self,
             transform: { _ in item },
@@ -104,7 +106,7 @@ extension NavigationDestinationTransformer.State {
         )
     }
 
-    private func removeUntilTransaction<Item: Hashable>(_ item: Item) {
+    private func removeUntilTransaction<Item: Hashable & Sendable>(_ item: Item) {
         transaction(
             for: Item.self,
             transform: { _ in item },
@@ -112,7 +114,7 @@ extension NavigationDestinationTransformer.State {
         )
     }
 
-    private func removeIncludingTransaction<Item: Hashable>(_ item: Item) {
+    private func removeIncludingTransaction<Item: Hashable & Sendable>(_ item: Item) {
         transaction(
             for: Item.self,
             transform: { _ in item },
@@ -120,7 +122,7 @@ extension NavigationDestinationTransformer.State {
         )
     }
 
-    private func removeTransaction<Item: Hashable>(_ item: Item) {
+    private func removeTransaction<Item: Hashable & Sendable>(_ item: Item) {
         transaction(
             for: Item.self,
             transform: { _ in item },
@@ -128,7 +130,7 @@ extension NavigationDestinationTransformer.State {
         )
     }
 
-    private func containsTransaction<Item: Hashable>(_ item: Item) {
+    private func containsTransaction<Item: Hashable & Sendable>(_ item: Item) {
         transaction(
             for: Item.self,
             transform: { _ in item },
@@ -136,7 +138,7 @@ extension NavigationDestinationTransformer.State {
         )
     }
 
-    func send<Item: Hashable>(_ item: Item) {
+    func send<Item: Hashable & Sendable>(_ item: Item) {
         switch action {
         case .setItems:
             setItemsTransaction(item)
@@ -153,7 +155,7 @@ extension NavigationDestinationTransformer.State {
         }
     }
 
-    func send<Item: Hashable & Codable>(_ item: Item) {
+    func send<Item: Hashable & Codable & Sendable>(_ item: Item) {
         switch action {
         case .setItems:
             setItemsTransaction(item)
