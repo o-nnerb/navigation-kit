@@ -6,6 +6,7 @@ import XCTest
 import Combine
 @testable import NavigationKit
 
+@MainActor
 class SceneActionTransformerTests: XCTestCase {
 
     var sceneAction: SceneAction!
@@ -22,7 +23,7 @@ class SceneActionTransformerTests: XCTestCase {
         cancellations = []
     }
 
-    func testTransformer_whenString_shouldBeString() async throws {
+    func testTransformer_whenString_shouldBeString() throws {
         // Given
         let expectation = expectation(description: "scene.action.transformer")
         let input = "Hello World"
@@ -39,7 +40,7 @@ class SceneActionTransformerTests: XCTestCase {
         sut.perform(sceneAction)
 
         // Then
-        await waitForExpectations(timeout: 15)
+        waitForExpectations(timeout: 15)
         XCTAssertEqual(output, input)
     }
 }

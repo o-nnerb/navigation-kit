@@ -6,6 +6,7 @@ import XCTest
 import SwiftUI
 @testable import NavigationKit
 
+@MainActor
 class NavigationStateTests: XCTestCase {
 
     func testNavigationState_whenEmpty_shouldBeEmpty() async throws {

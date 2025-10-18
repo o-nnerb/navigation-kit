@@ -5,6 +5,7 @@
 import XCTest
 @testable import NavigationKit
 
+@MainActor
 class ResolverTests: XCTestCase {
 
     struct HashKey: Hashable {}

@@ -6,6 +6,7 @@ import XCTest
 import Combine
 @testable import NavigationKit
 
+@MainActor
 class SceneTransactionTests: XCTestCase {
 
     var cancellations = [AnyCancellable]()
@@ -15,7 +16,7 @@ class SceneTransactionTests: XCTestCase {
         cancellations = []
     }
 
-    func testSceneTransaction_whenTwoFired_shouldTransactionToTwoElements() async throws {
+    func testSceneTransaction_whenTwoFired_shouldTransactionToTwoElements() throws {
         // Given
         let expectation = expectation(description: "scene.transaction")
         var values = [Int]()
@@ -33,7 +34,7 @@ class SceneTransactionTests: XCTestCase {
         sut(2)
 
         // Then
-        await waitForExpectations(timeout: 15)
+        waitForExpectations(timeout: 15)
         XCTAssertEqual(values, [1, 2])
     }
 }
