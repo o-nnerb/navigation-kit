@@ -6,6 +6,7 @@ import XCTest
 @testable import NavigationKit
 
 // swiftlint:disable type_name
+@MainActor
 class NavigationDestinationTransformerModifierTests: XCTestCase {
 
     var navigationAction: NavigationAction!

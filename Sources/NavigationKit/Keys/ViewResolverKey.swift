@@ -4,10 +4,13 @@
 
 import SwiftUI
 
-typealias _ViewResolver = Resolver<ObjectIdentifier, (AnyHashable) -> AnyView>
+typealias _ViewResolver = Resolver<ObjectIdentifier, @MainActor (AnyHashable) -> AnyView>
 
 struct ViewResolverKey: EnvironmentKey {
-    static var defaultValue: _ViewResolver?
+
+    static var defaultValue: _ViewResolver? {
+        nil
+    }
 }
 
 extension EnvironmentValues {
@@ -41,9 +44,9 @@ extension View {
         - content: The closure that creates a view for the item.
      - Returns: A modified view with a view resolver configured to handle the specified item.
      */
-    public func viewResolver<Item: Hashable, Content: View>(
+    public func viewResolver<Item: Hashable & Sendable, Content: View>(
         for type: Item.Type,
-        @ViewBuilder _ content: @escaping (Item) -> Content
+        @ViewBuilder _ content: @escaping @MainActor (Item) -> Content
     ) -> some View {
         resolver(
             keyPath: \._viewResolver,

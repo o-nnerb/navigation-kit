@@ -5,6 +5,7 @@
 import SwiftUI
 import Combine
 
+@MainActor
 final class NavigationState: ObservableObject {
 
     private var _path = NavigationPath()

@@ -6,6 +6,7 @@ import XCTest
 import Combine
 @testable import NavigationKit
 
+@MainActor
 class SceneActionTests: XCTestCase {
 
     var cancellations = [AnyCancellable]()
@@ -15,7 +16,7 @@ class SceneActionTests: XCTestCase {
         cancellations = []
     }
 
-    func testSceneAction_whenIntegerRegister_shouldBeValid() async throws {
+    func testSceneAction_whenIntegerRegister_shouldBeValid() throws {
         // Given
         let expectation = expectation(description: "scene.action")
         let sceneAction = SceneAction()
@@ -31,11 +32,11 @@ class SceneActionTests: XCTestCase {
         sceneAction(value)
 
         // Then
-        await waitForExpectations(timeout: 15)
+        waitForExpectations(timeout: 15)
         XCTAssertEqual(received, value)
     }
 
-    func testSceneAction_whenIntegerRegisterTwoTimes_shouldBeValid() async throws {
+    func testSceneAction_whenIntegerRegisterTwoTimes_shouldBeValid() throws {
         // Given
         let expectation = expectation(description: "scene.action")
         let sceneAction = SceneAction()
@@ -58,7 +59,7 @@ class SceneActionTests: XCTestCase {
         sceneAction(value)
 
         // Then
-        await waitForExpectations(timeout: 15)
+        waitForExpectations(timeout: 15)
         XCTAssertEqual(received, [value, value])
     }
 }

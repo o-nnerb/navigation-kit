@@ -1,4 +1,4 @@
-// swift-tools-version: 5.7
+// swift-tools-version: 6.2
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -10,12 +10,6 @@ let package = Package(
         .library(
             name: "NavigationKit",
             targets: ["NavigationKit"]
-        )
-    ],
-    dependencies: [
-        .package(
-            url: "https://github.com/apple/swift-docc-plugin.git",
-            from: "1.2.0"
         )
     ],
     targets: [

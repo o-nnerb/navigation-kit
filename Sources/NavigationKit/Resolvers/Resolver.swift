@@ -4,7 +4,8 @@
 
 import Foundation
 
-struct Resolver<Key: Hashable, Value> {
+@MainActor
+struct Resolver<Key: Hashable & Sendable, Value: Sendable> {
 
     private var table: [Key: Factory<Value>] = [:]
 

@@ -5,7 +5,7 @@
 import SwiftUI
 
 /// A type that resolves an item to a view.
-public struct ViewResolver {
+public struct ViewResolver: Sendable {
 
     private let _viewResolver: _ViewResolver
 
@@ -18,6 +18,7 @@ public struct ViewResolver {
     /// - Parameter item: The item to resolve.
     ///
     /// - Returns: A view for the specified item.
+    @MainActor
     public func callAsFunction<Item: Hashable>(_ item: Item) -> some View {
         _viewResolver(ObjectIdentifier(Item.self))(item)
     }

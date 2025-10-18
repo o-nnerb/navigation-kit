@@ -5,6 +5,7 @@
 import XCTest
 @testable import NavigationKit
 
+@MainActor
 class NavigationDestinationTransformerTests: XCTestCase {
 
     var navigationState: NavigationStateMock!
@@ -23,7 +24,7 @@ class NavigationDestinationTransformerTests: XCTestCase {
         navigationAction = nil
     }
 
-    struct NotCodable<Value>: Hashable where Value: Hashable {
+    struct NotCodable<Value: Sendable>: Sendable, Hashable where Value: Hashable {
         let value: Value
     }
 
