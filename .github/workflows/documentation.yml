@@ -20,10 +20,10 @@ jobs:
     runs-on: macOS-13
     steps:
       - name: ⬇️ Get Sources
-        uses: actions/checkout@v3.5.3
+        uses: actions/checkout@v4.0.0
 
       - name: Setup Pages
-        uses: actions/configure-pages@v3.0.6
+        uses: actions/configure-pages@v4.0.0
 
       - name: Swift DocC Action
         uses: fwcd/swift-docc-action@v1.0.2
@@ -35,7 +35,7 @@ jobs:
           transform-for-static-hosting: 'true'
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1.0.9
+        uses: actions/upload-pages-artifact@v3.0.1
 
   # Deployment job
   deploy:
@@ -47,4 +47,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v2.0.2
+        uses: actions/deploy-pages@v4.0.4
