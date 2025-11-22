@@ -1,6 +1,6 @@
-[![Swift Compatibility](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fbrennobemoura%2Fnavigation-kit%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/brennobemoura/navigation-kit)
-[![Platform Compatibility](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fbrennobemoura%2Fnavigation-kit%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/brennobemoura/navigation-kit)
-[![codecov](https://codecov.io/gh/brennobemoura/navigation-kit/branch/main/graph/badge.svg?token=C1KZ4624FC)](https://codecov.io/gh/brennobemoura/navigation-kit)
+[![Swift Compatibility](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fo-nnerb%2Fnavigation-kit%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/o-nnerb/navigation-kit)
+[![Platform Compatibility](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fo-nnerb%2Fnavigation-kit%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/o-nnerb/navigation-kit)
+[![codecov](https://codecov.io/gh/o-nnerb/navigation-kit/branch/main/graph/badge.svg?token=C1KZ4624FC)](https://codecov.io/gh/o-nnerb/navigation-kit)
 
 # NavigationKit
 
@@ -16,7 +16,7 @@ in two ways:
 1. Xcode
 
 In Xcode 14, go to `File > Packages > Add Package Dependency...`, then paste in 
-`https://github.com/brennobemoura/navigation-kit.git`
+`https://github.com/o-nnerb/navigation-kit.git`
 
 2. Package.swift
 
@@ -33,7 +33,7 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/brennobemoura/navigation-kit.git", from: "1.0.0")
+        .package(url: "https://github.com/o-nnerb/navigation-kit.git", from: "1.0.0")
     ],
     targets: [
         .target(
