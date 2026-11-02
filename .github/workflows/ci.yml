@@ -36,6 +36,9 @@ jobs:
       swift-version: '6.4'
       platform: xcode-27
 
+      # Step 2 – Format (the package has no .swift-format; linting is done by swiftlint.yml)
+      enable-format: false
+
       # Step 4 – Apple (NavigationKit declares iOS, tvOS, macOS and watchOS only)
       enable-apple-tests: true
       package-name: "NavigationKit"
