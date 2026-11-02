@@ -172,6 +172,7 @@ class NavigationActionTests: XCTestCase {
         let items = [1, 2, 3, 4]
 
         let encoder = JSONEncoder()
+        encoder.outputFormatting = .sortedKeys
 
         // When
         navigationAction.setItems(items)

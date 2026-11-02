@@ -17,10 +17,13 @@ permissions:
 
 jobs:
   build:
-    runs-on: macOS-13
+    runs-on: xcode-27
     steps:
       - name: ⬇️ Get Sources
         uses: actions/checkout@v7.0.1
+
+      - name: ☑️ Xcode Select
+        run: sudo xcode-select -switch /Applications/Xcode_27.1.app
 
       - name: Setup Pages
         uses: actions/configure-pages@v4.0.0
