@@ -260,6 +260,50 @@ struct SecondCoordinator: View {
 Inside `errorScene` or `thirdScene` you can call `navigationAction` or
 `sceneAction` to perform something.
 
+#### Using Observation
+
+`ObjectConnection` does not require the ViewModel to be an `ObservableObject`, so
+an `@Observable` ViewModel works the same way: it is created once, kept while the
+input is the same, created again when the input changes, and the content is
+rendered again when the properties it reads change.
+
+Since an `@Observable` type has no `$destination` publisher, react to the property
+with `onChange` (the `Destination` type needs to be `Equatable`):
+
+```swift
+@Observable
+@MainActor
+final class SecondViewModel {
+    var destination: Destination?
+}
+
+struct SecondCoordinator: View {
+
+    let model: SomeModel
+
+    var body: some View {
+        ObjectConnection(model, SecondViewModel.init) { viewModel in
+            SecondView(viewModel: viewModel)
+                .onChange(of: viewModel.destination) { _, destination in
+                    switch destination {
+                    case .error(let error):
+                        errorScene(error)
+                    case .third(let third):
+                        thirdScene(third)
+                    case .none:
+                        break
+                    }
+                }
+        }
+    }
+}
+```
+
+⚠️ The Observation framework requires iOS 17, tvOS 17, macOS 14, watchOS 10 or
+visionOS 1. NavigationKit itself keeps supporting iOS 16, tvOS 16, macOS 13 and
+watchOS 9, where the `ObservableObject` approach above remains the way to go.
+`viewState(_:keyPath:)` also accepts an `@Observable` object.
+
 ### ViewState
 
 The `viewState(_:)` modifier sets a `ViewState` to `active` when the view appears
