@@ -26,7 +26,7 @@ private struct ViewStateModifier<Object: AnyObject>: ViewModifier {
             .onDisappear {
                 update(.inactive, object)
             }
-            .onChange(of: Box(object: object)) {
+            .onValueChange(of: Box(object: object)) {
                 update(viewState, $0.object)
             }
     }

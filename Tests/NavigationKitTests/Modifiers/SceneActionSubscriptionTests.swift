@@ -103,7 +103,7 @@ class SceneActionSubscriptionTests: XCTestCase {
     func testSubscription_whenReleased_shouldStopConsuming() async throws {
         // Given
         var sut: SceneActionSubscription<Int>? = .init()
-        weak var weakSut = sut
+        weak let weakSut = sut
         let sceneAction = SceneAction()
         let recorder = Recorder()
 

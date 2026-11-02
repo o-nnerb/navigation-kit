@@ -24,7 +24,7 @@ import SwiftUI
 @MainActor
 public struct ObjectConnection<Input, Content, ViewModel>: View where Input: Hashable, Content: View {
 
-    @StateObject private var state = State()
+    @StateObject private var state = ObjectConnectionState<ViewModel>()
 
     private let input: Input
     private let viewModel: @MainActor (Input) -> ViewModel
@@ -67,57 +67,54 @@ public struct ObjectConnection<Input, Content, ViewModel>: View where Input: Has
     @ViewBuilder
     public var body: some View {
         content(state.resolveInTheFly(input, viewModel))
-            .onChange(of: input) {
+            .onValueChange(of: input) {
                 state.updateIfNeeded($0, viewModel)
             }
     }
 }
 
-extension ObjectConnection {
+@MainActor
+private final class ObjectConnectionState<ViewModel>: ObservableObject {
 
-    @MainActor
-    fileprivate class State: ObservableObject {
+    private var input: AnyHashable?
+    private var viewModel: ViewModel?
 
-        private var input: Input?
-        private var viewModel: ViewModel?
+    init() {}
 
-        init() {}
+    func resolveInTheFly<Input: Hashable>(
+        _ input: Input,
+        _ closure: @MainActor @escaping (Input) -> ViewModel
+    ) -> ViewModel {
+        let (_, viewModel) = updates(input, closure)
+        return viewModel
+    }
 
-        func resolveInTheFly(
-            _ input: Input,
-            _ closure: @MainActor @escaping (Input) -> ViewModel
-        ) -> ViewModel {
-            let (_, viewModel) = updates(input, closure)
-            return viewModel
+    func updateIfNeeded<Input: Hashable>(
+        _ input: Input,
+        _ closure: @MainActor @escaping (Input) -> ViewModel
+    ) {
+        let (updated, _) = updates(input, closure)
+
+        if updated {
+            objectWillChange.send()
+        }
+    }
+
+    func updates<Input: Hashable>(
+        _ input: Input,
+        _ closure: @MainActor @escaping (Input) -> ViewModel
+    ) -> (Bool, ViewModel) {
+        if self.input != AnyHashable(input) {
+            self.input = AnyHashable(input)
+            self.viewModel = nil
         }
 
-        func updateIfNeeded(
-            _ input: Input,
-            _ closure: @MainActor @escaping (Input) -> ViewModel
-        ) {
-            let (updated, _) = updates(input, closure)
-
-            if updated {
-                objectWillChange.send()
-            }
+        if let viewModel {
+            return (false, viewModel)
         }
 
-        func updates(
-            _ input: Input,
-            _ closure: @MainActor @escaping (Input) -> ViewModel
-        ) -> (Bool, ViewModel) {
-            if self.input != input {
-                self.input = input
-                self.viewModel = nil
-            }
-
-            if let viewModel {
-                return (false, viewModel)
-            }
-
-            let viewModel = closure(input)
-            self.viewModel = viewModel
-            return (true, viewModel)
-        }
+        let viewModel = closure(input)
+        self.viewModel = viewModel
+        return (true, viewModel)
     }
 }
