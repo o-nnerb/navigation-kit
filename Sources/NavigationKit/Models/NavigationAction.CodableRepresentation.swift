@@ -5,9 +5,12 @@ import SwiftUI
 
 extension NavigationAction {
 
+    /// A value that describes the contents of a navigation stack in a serializable format.
+    ///
+    /// The representation saved on one OS version can be restored on any other supported one.
     public struct CodableRepresentation: Codable {
 
-        let navigationPath: NavigationPath.CodableRepresentation
+        let navigationPath: [String]
         let hashes: [Int]
     }
 }

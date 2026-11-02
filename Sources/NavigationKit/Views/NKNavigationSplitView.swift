@@ -15,7 +15,7 @@ import SwiftUI
 /// the stack.
 public struct NKNavigationSplitView<Sidebar: View, Content: View, Detail: View>: View {
 
-    @StateObject var navigationState = NavigationState()
+    @StateObject var storage = NavigationStateStorage()
     private let initialized: Initialized
 
     init(_ initialized: Initialized) {
@@ -25,72 +25,136 @@ public struct NKNavigationSplitView<Sidebar: View, Content: View, Detail: View>:
     public var body: some View {
         Group {
             switch initialized {
-            case .columnVisibilityFull(let columnVisibility, let sidebar, let content, let detail):
-                NavigationSplitView(
-                    columnVisibility: columnVisibility,
-                    sidebar: { sidebar },
-                    content: { content },
-                    detail: {
-                        _NavigationStack(
-                            navigationState: navigationState,
-                            pendingItems: nil,
-                            content: detail
-                        )
-                    }
-                )
-            case .columnVisibility(let columnVisibility, let sidebar, let detail):
-                NavigationSplitView(
-                    columnVisibility: columnVisibility,
-                    sidebar: { sidebar },
-                    detail: {
-                        _NavigationStack(
-                            navigationState: navigationState,
-                            pendingItems: nil,
-                            content: detail
-                        )
-                    }
-                )
             case .regularFull(let sidebar, let content, let detail):
-                NavigationSplitView(
-                    sidebar: { sidebar },
-                    content: { content },
-                    detail: {
-                        _NavigationStack(
-                            navigationState: navigationState,
-                            pendingItems: nil,
-                            content: detail
-                        )
-                    }
-                )
+                layout(sidebar: sidebar, content: content, detail: detail)
             case .regular(let sidebar, let detail):
-                NavigationSplitView(
-                    sidebar: { sidebar },
-                    detail: {
-                        _NavigationStack(
-                            navigationState: navigationState,
-                            pendingItems: nil,
-                            content: detail
-                        )
-                    }
-                )
+                layout(sidebar: sidebar, detail: detail)
+            default:
+                if #available(iOS 16.0, tvOS 16.0, macOS 13.0, *) {
+                    columnVisibilityLayout
+                }
             }
         }
-        .environment(\._navigationAction, NavigationAction(navigationState))
+        .environment(\._navigationAction, NavigationAction(storage.state))
+    }
+
+    private func detailStack(_ detail: Detail) -> some View {
+        _NavigationStackHost(
+            storage: storage,
+            pendingItems: nil,
+            isEmbedded: true,
+            content: detail
+        )
+    }
+}
+
+// MARK: - Layouts
+
+extension NKNavigationSplitView {
+
+    @ViewBuilder
+    private func layout(sidebar: Sidebar, content: Content, detail: Detail) -> some View {
+        #if os(iOS) || os(tvOS) || os(macOS)
+        if storage.fallback != nil {
+            NavigationView {
+                sidebar
+                content
+                detailStack(detail)
+            }
+        } else if #available(iOS 16.0, tvOS 16.0, macOS 13.0, *) {
+            NavigationSplitView(
+                sidebar: { sidebar },
+                content: { content },
+                detail: { detailStack(detail) }
+            )
+        }
+        #else
+        NavigationSplitView(
+            sidebar: { sidebar },
+            content: { content },
+            detail: { detailStack(detail) }
+        )
+        #endif
+    }
+
+    @ViewBuilder
+    private func layout(sidebar: Sidebar, detail: Detail) -> some View {
+        #if os(iOS) || os(tvOS) || os(macOS)
+        if storage.fallback != nil {
+            NavigationView {
+                sidebar
+                detailStack(detail)
+            }
+        } else if #available(iOS 16.0, tvOS 16.0, macOS 13.0, *) {
+            NavigationSplitView(
+                sidebar: { sidebar },
+                detail: { detailStack(detail) }
+            )
+        }
+        #else
+        NavigationSplitView(
+            sidebar: { sidebar },
+            detail: { detailStack(detail) }
+        )
+        #endif
+    }
+
+    @available(iOS 16.0, tvOS 16.0, macOS 13.0, *)
+    @ViewBuilder
+    private var columnVisibilityLayout: some View {
+        switch initialized {
+        case .columnVisibilityFull(let columnVisibility, let sidebar, let content, let detail):
+            NavigationSplitView(
+                columnVisibility: columnVisibility.value,
+                sidebar: { sidebar },
+                content: { content },
+                detail: { detailStack(detail) }
+            )
+        case .columnVisibility(let columnVisibility, let sidebar, let detail):
+            NavigationSplitView(
+                columnVisibility: columnVisibility.value,
+                sidebar: { sidebar },
+                detail: { detailStack(detail) }
+            )
+        default:
+            EmptyView()
+        }
     }
 }
 
 extension NKNavigationSplitView {
 
+    /// The binding of the column visibility, type-erased because `NavigationSplitViewVisibility` is
+    /// not available before iOS 16, tvOS 16 and macOS 13.
+    struct ColumnVisibility {
+
+        private let binding: Any
+
+        @available(iOS 16.0, tvOS 16.0, macOS 13.0, *)
+        init(_ binding: Binding<NavigationSplitViewVisibility>) {
+            self.binding = binding
+        }
+
+        @available(iOS 16.0, tvOS 16.0, macOS 13.0, *)
+        var value: Binding<NavigationSplitViewVisibility> {
+            guard let binding = binding as? Binding<NavigationSplitViewVisibility> else {
+                preconditionFailure("The column visibility is not a NavigationSplitViewVisibility binding")
+            }
+
+            return binding
+        }
+    }
+
     enum Initialized {
         case columnVisibilityFull(
-            Binding<NavigationSplitViewVisibility>,
+            ColumnVisibility,
             Sidebar,
             Content,
             Detail
         )
 
         case columnVisibility(
-            Binding<NavigationSplitViewVisibility>,
+            ColumnVisibility,
             Sidebar,
             Detail
         )
@@ -117,6 +181,7 @@ extension NKNavigationSplitView {
     ///    - sidebar: A closure that returns the sidebar view.
     ///    - content: A closure that returns the content view.
     ///    - detail: A closure that returns the detail view.
+    @available(iOS 16.0, tvOS 16.0, macOS 13.0, *)
     public init(
         columnVisibility: Binding<NavigationSplitViewVisibility>,
         @ViewBuilder sidebar: () -> Sidebar,
@@ -125,7 +190,7 @@ extension NKNavigationSplitView {
     ) {
         self.init(
             .columnVisibilityFull(
-                columnVisibility,
+                ColumnVisibility(columnVisibility),
                 sidebar(),
                 content(),
                 detail()
@@ -139,6 +204,7 @@ extension NKNavigationSplitView {
     ///    - columnVisibility: A binding that controls the visibility of the sidebar column.
     ///    - sidebar: A closure that returns the sidebar view.
     ///    - detail: A closure that returns the detail view.
+    @available(iOS 16.0, tvOS 16.0, macOS 13.0, *)
     public init(
         columnVisibility: Binding<NavigationSplitViewVisibility>,
         @ViewBuilder sidebar: () -> Sidebar,
@@ -146,7 +212,7 @@ extension NKNavigationSplitView {
     ) where Content == EmptyView {
         self.init(
             .columnVisibility(
-                columnVisibility,
+                ColumnVisibility(columnVisibility),
                 sidebar(),
                 detail()
             )

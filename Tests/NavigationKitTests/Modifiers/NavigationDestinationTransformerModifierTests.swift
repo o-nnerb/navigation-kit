@@ -13,7 +13,7 @@ class NavigationDestinationTransformerModifierTests: XCTestCase {
 
     override func setUp() async throws {
         try await super.setUp()
-        navigationAction = .init(NavigationState())
+        navigationAction = .init(FallbackNavigationState())
     }
 
     override func tearDown() async throws {

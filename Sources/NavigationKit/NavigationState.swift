@@ -3,6 +3,7 @@
 
 import SwiftUI
 
+@available(iOS 16.0, tvOS 16.0, macOS 13.0, *)
 @MainActor
 final class NavigationState: ObservableObject {
 
@@ -44,6 +45,18 @@ final class NavigationState: ObservableObject {
         lastPendingNavigationItemsHashValue = hashValue
         hashes = pendingItems?.hashes ?? []
         _path = pendingItems?.path ?? .init()
+
+        // The path cannot be read back item by item, so the items that start the stack need a way to
+        // be appended again, for `remove(_:)` to rebuild the path without them.
+        restore = [:]
+
+        for entry in pendingItems?.entries ?? [] {
+            restore[entry.hash] = { [weak self] in
+                if let self {
+                    entry.appendToState(self)
+                }
+            }
+        }
     }
 
     private func updateHashes() {
@@ -53,6 +66,7 @@ final class NavigationState: ObservableObject {
 
 // MARK: - NavigationStateProtocol
 
+@available(iOS 16.0, tvOS 16.0, macOS 13.0, *)
 extension NavigationState: NavigationStateProtocol {
 
     func setItems<Item: Hashable>(_ items: [Item]) {
@@ -173,12 +187,14 @@ extension NavigationState: NavigationStateProtocol {
     }
 
     var codable: NavigationAction.CodableRepresentation? {
-        path.codable.map {
-            .init(
-                navigationPath: $0,
-                hashes: hashes
-            )
-        }
+        path.codable
+            .flatMap { NavigationPathCodec.strings(from: $0) }
+            .map {
+                .init(
+                    navigationPath: $0,
+                    hashes: hashes
+                )
+            }
     }
 
     func contains<Item: Hashable>(_ item: Item) -> Bool {
