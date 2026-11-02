@@ -3,6 +3,7 @@
 */
 
 import XCTest
+
 @testable import NavigationKit
 
 @MainActor

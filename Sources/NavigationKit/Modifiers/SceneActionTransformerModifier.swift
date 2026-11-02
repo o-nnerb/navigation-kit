@@ -2,8 +2,8 @@
  See LICENSE for this package's licensing information.
 */
 
-import SwiftUI
 import Combine
+import SwiftUI
 
 private struct SceneActionTransformerModifier<Action: Hashable>: ViewModifier {
 
@@ -22,18 +22,16 @@ private struct SceneActionTransformerModifier<Action: Hashable>: ViewModifier {
 
 extension View {
 
-    /**
-     Transforms a specific action type to any action type using the transformer. The new action type is used
-     to perform an action in the scene.
-
-     - Parameters:
-        - actionType: The action type to map from.
-        - closure: The closure that accepts a `SceneActionTransformer` instance
-     and an item of the specified type. You can use the provided transformer to customize the
-     scene action associated with the item.
-
-     - Returns: A modified `View` that performs the scene action using the new action type.
-     */
+    /// Transforms a specific action type to any action type using the transformer. The new action type is used
+    /// to perform an action in the scene.
+    ///
+    /// - Parameters:
+    ///    - actionType: The action type to map from.
+    ///    - closure: The closure that accepts a `SceneActionTransformer` instance
+    /// and an item of the specified type. You can use the provided transformer to customize the
+    /// scene action associated with the item.
+    ///
+    /// - Returns: A modified `View` that performs the scene action using the new action type.
     public func sceneActionTransformer<Action: Hashable>(
         for actionType: Action.Type,
         _ closure: @escaping (SceneActionTransformer, Action) -> Void

@@ -7,6 +7,7 @@ on:
       - 'Package.swift'
       - 'Sources/**'
       - 'Tests/**'
+      - '.swift-format'
       - '.github/workflows/ci.yml'
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
@@ -15,6 +16,7 @@ on:
       - 'Package.swift'
       - 'Sources/**'
       - 'Tests/**'
+      - '.swift-format'
       - '.github/workflows/ci.yml'
   workflow_dispatch: {}
 
@@ -36,8 +38,16 @@ jobs:
       swift-version: '6.4'
       platform: xcode-27
 
-      # Step 2 – Format (the package has no .swift-format; linting is done by swiftlint.yml)
-      enable-format: false
+      # Step 1 – Header Validation
+      enable-header-validation: true
+      header-template: |
+        /*
+         See LICENSE for this package's licensing information.
+        */
+
+      # Step 2 – Format
+      enable-format: true
+      format-swift-version: '6.4'
 
       # Step 4 – Apple (NavigationKit declares iOS, tvOS, macOS and watchOS only)
       enable-apple-tests: true

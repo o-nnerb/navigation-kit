@@ -2,8 +2,9 @@
  See LICENSE for this package's licensing information.
 */
 
-import XCTest
 import Combine
+import XCTest
+
 @testable import NavigationKit
 
 @MainActor

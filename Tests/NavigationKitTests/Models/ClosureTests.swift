@@ -3,6 +3,7 @@
 */
 
 import XCTest
+
 @testable import NavigationKit
 
 class ClosureTests: XCTestCase {
@@ -54,7 +55,7 @@ class ClosureTests: XCTestCase {
     func testClosure_whenParameterIsVoid_shouldReturnBool() {
         // Given
         let closure = Closure<Void, Bool>.closure {
-            return true
+            true
         }
 
         // When

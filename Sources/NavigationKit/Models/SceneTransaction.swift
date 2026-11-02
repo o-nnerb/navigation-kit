@@ -2,8 +2,8 @@
  See LICENSE for this package's licensing information.
 */
 
-import Foundation
 import Combine
+import Foundation
 
 /// A type representing a scene transaction that can be observed by a view
 /// and trigger a destination action.

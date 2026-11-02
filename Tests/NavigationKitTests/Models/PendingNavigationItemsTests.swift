@@ -2,8 +2,9 @@
  See LICENSE for this package's licensing information.
 */
 
-import XCTest
 import SwiftUI
+import XCTest
+
 @testable import NavigationKit
 
 class PendingNavigationItemsTests: XCTestCase {

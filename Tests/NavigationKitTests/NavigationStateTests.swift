@@ -2,8 +2,9 @@
  See LICENSE for this package's licensing information.
 */
 
-import XCTest
 import SwiftUI
+import XCTest
+
 @testable import NavigationKit
 
 @MainActor
@@ -160,10 +161,12 @@ class NavigationStateTests: XCTestCase {
         XCTAssertEqual(
             try navigationState.codable.map { try encoder.encode($0) },
             try NavigationPath(items).codable.map {
-                try encoder.encode(NavigationAction.CodableRepresentation(
-                    navigationPath: $0,
-                    hashes: items.map(\.hashValue)
-                ))
+                try encoder.encode(
+                    NavigationAction.CodableRepresentation(
+                        navigationPath: $0,
+                        hashes: items.map(\.hashValue)
+                    )
+                )
             }
         )
     }

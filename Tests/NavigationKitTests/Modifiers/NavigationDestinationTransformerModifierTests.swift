@@ -3,6 +3,7 @@
 */
 
 import XCTest
+
 @testable import NavigationKit
 
 // swiftlint:disable type_name

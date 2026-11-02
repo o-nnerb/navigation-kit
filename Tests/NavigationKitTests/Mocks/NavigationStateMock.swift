@@ -4,6 +4,7 @@
 
 import Foundation
 import SwiftUI
+
 @testable import NavigationKit
 
 class NavigationStateMock: NavigationStateProtocol {

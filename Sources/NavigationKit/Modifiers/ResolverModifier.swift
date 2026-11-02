@@ -75,11 +75,13 @@ extension View {
         key: Key,
         value: Value
     ) -> some View {
-        modifier(ResolverModifier(
-            keyPath: keyPath,
-            init: initClosure,
-            key: key,
-            value: value
-        ))
+        modifier(
+            ResolverModifier(
+                keyPath: keyPath,
+                init: initClosure,
+                key: key,
+                value: value
+            )
+        )
     }
 }

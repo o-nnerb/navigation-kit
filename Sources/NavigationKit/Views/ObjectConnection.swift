@@ -4,26 +4,24 @@
 
 import SwiftUI
 
-/**
- An object connection that takes an input value, an object, and a content view to display.
-
- This connection automatically handles the creation, update, and disposal of the object based
- on changes to the input value.
-
- ```swift
- struct UserCoordinator: View {
-
-     // This needs to be Hashable
-     let scene: UserScene
-
-     var body: some View {
-         ObjectConnection(scene, UserViewModel.init) { viewModel in
-             UserView(viewModel: viewModel)
-         }
-     }
- }
- ```
- */
+/// An object connection that takes an input value, an object, and a content view to display.
+///
+/// This connection automatically handles the creation, update, and disposal of the object based
+/// on changes to the input value.
+///
+/// ```swift
+/// struct UserCoordinator: View {
+///
+///     // This needs to be Hashable
+///     let scene: UserScene
+///
+///     var body: some View {
+///         ObjectConnection(scene, UserViewModel.init) { viewModel in
+///             UserView(viewModel: viewModel)
+///         }
+///     }
+/// }
+/// ```
 @MainActor
 public struct ObjectConnection<Input, Content, ViewModel>: View where Input: Hashable, Content: View {
 
@@ -33,14 +31,12 @@ public struct ObjectConnection<Input, Content, ViewModel>: View where Input: Has
     private let viewModel: @MainActor (Input) -> ViewModel
     private let content: (ViewModel) -> Content
 
-    /**
-     Initializes a new instance of the view model connection with the provided input, view model, and content.
-
-     - Parameters:
-        - input: The input value used to generate the view model.
-        - viewModel: The closure used to generate the view model.
-        - content: The closure used to generate the content view.
-     */
+    /// Initializes a new instance of the view model connection with the provided input, view model, and content.
+    ///
+    /// - Parameters:
+    ///    - input: The input value used to generate the view model.
+    ///    - viewModel: The closure used to generate the view model.
+    ///    - content: The closure used to generate the content view.
     public init(
         _ input: Input,
         _ viewModel: @MainActor @escaping (Input) -> ViewModel,
@@ -51,21 +47,20 @@ public struct ObjectConnection<Input, Content, ViewModel>: View where Input: Has
         self.content = content
     }
 
-    /**
-     Initializes a new instance of the view model connection with the provided view model and content.
-
-     This initializer is intended to be used when the input value is a `UUID`.
-
-     - Parameters:
-        - viewModel: The closure used to generate the view model.
-        - content: The closure used to generate the content view.
-     */
+    /// Initializes a new instance of the view model connection with the provided view model and content.
+    ///
+    /// This initializer is intended to be used when the input value is a `UUID`.
+    ///
+    /// - Parameters:
+    ///    - viewModel: The closure used to generate the view model.
+    ///    - content: The closure used to generate the content view.
     public init(
         viewModel: @MainActor @escaping () -> ViewModel,
         @ViewBuilder content: @escaping (ViewModel) -> Content
     ) where Input == UUID {
         self.init(
-            UUID(), { _ in viewModel() },
+            UUID(),
+            { _ in viewModel() },
             content: content
         )
     }
@@ -79,10 +74,10 @@ public struct ObjectConnection<Input, Content, ViewModel>: View where Input: Has
     }
 }
 
-private extension ObjectConnection {
+extension ObjectConnection {
 
     @MainActor
-    class State: ObservableObject {
+    fileprivate class State: ObservableObject {
 
         private var input: Input?
         private var viewModel: ViewModel?
