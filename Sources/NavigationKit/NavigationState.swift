@@ -1,7 +1,6 @@
 // Copyright 2026 Brenno Giovanini de Moura
 // SPDX-License-Identifier: MIT
 
-import Combine
 import SwiftUI
 
 @MainActor
@@ -13,7 +12,6 @@ final class NavigationState: ObservableObject {
     private var lastPendingNavigationItemsHashValue: Int?
 
     private var isLock = false
-    private var cancellations: [AnyCancellable] = []
 
     var path: NavigationPath {
         get { _path }
@@ -21,15 +19,12 @@ final class NavigationState: ObservableObject {
             _path = newValue
             if !isLock {
                 objectWillChange.send()
+                updateHashes()
             }
         }
     }
 
-    init() {
-        objectWillChange.sink { [weak self] in
-            self?.updateHashes()
-        }.store(in: &cancellations)
-    }
+    init() {}
 
     subscript(_ pendingItems: PendingNavigationItems?) -> NavigationPath {
         get {

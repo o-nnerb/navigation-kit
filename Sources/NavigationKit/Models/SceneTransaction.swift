@@ -1,15 +1,25 @@
 // Copyright 2026 Brenno Giovanini de Moura
 // SPDX-License-Identifier: MIT
 
-import Combine
 import Foundation
+import SwiftAsyncStream
 
 /// A type representing a scene transaction that can be observed by a view
 /// and trigger a destination action.
-public struct SceneTransaction<Destination> {
+///
+/// Observe a transaction by iterating its ``values``, for example from a view's `task`:
+///
+/// ```swift
+/// .task {
+///     for await destination in transaction.values {
+///         // ...
+///     }
+/// }
+/// ```
+public struct SceneTransaction<Destination: Sendable>: Sendable {
 
     private let seed: Seed
-    private let subject = PassthroughSubject<Destination, Never>()
+    private let broadcast = Broadcast<Destination>()
 
     /// Initializes a new transaction.
     public init() {
@@ -32,13 +42,17 @@ extension SceneTransaction: Hashable {
 
 extension SceneTransaction {
 
-    /// A publisher that emits a destination value when the transaction is triggered.
-    public var publisher: AnyPublisher<Destination, Never> {
-        subject.eraseToAnyPublisher()
+    /// An asynchronous sequence that emits a destination value each time the transaction is triggered.
+    ///
+    /// Every iterator receives every value triggered after it was created (the subscription starts
+    /// when `makeAsyncIterator()` is called, not at the first `next()`). Cancelling the task that
+    /// iterates ends the sequence.
+    public var values: AnyAsyncSequence<Destination> {
+        broadcast.values.eraseToAnyAsyncSequence()
     }
 
     /// Triggers the transaction's destination action.
     public func callAsFunction(_ destination: Destination) {
-        subject.send(destination)
+        broadcast.send(destination)
     }
 }
