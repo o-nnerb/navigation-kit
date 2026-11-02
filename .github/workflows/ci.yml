@@ -41,9 +41,8 @@ jobs:
       # Step 1 – Header Validation
       enable-header-validation: true
       header-template: |
-        /*
-         See LICENSE for this package's licensing information.
-        */
+        // Copyright 2026 Brenno Giovanini de Moura
+        // SPDX-License-Identifier: MIT
 
       # Step 2 – Format
       enable-format: true
