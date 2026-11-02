@@ -11,7 +11,7 @@ and decouple views from the navigation flow.
 ## Requirements
 
 - Swift 6.4 or later
-- iOS 16+, tvOS 16+, macOS 13+, watchOS 9+
+- iOS 15+, tvOS 15+, macOS 12+, watchOS 9+, visionOS 1+
 
 ## Installation
 
@@ -31,7 +31,7 @@ import PackageDescription
 
 let package = Package(
     name: "MyPackage",
-    platforms: [.iOS(.v16), .tvOS(.v16), .macOS(.v13), .watchOS(.v9)],
+    platforms: [.iOS(.v15), .tvOS(.v15), .macOS(.v12), .watchOS(.v9), .visionOS(.v1)],
     products: [
         .library(
             name: "MyPackage",
@@ -86,11 +86,23 @@ struct FirstView: View {
     var body: some View {
         Button("Push") {
             // SomeModel needs to be mapped using
-            // navigationDestination(for:destination:)
-            // from SwiftUI.
+            // nkNavigationDestination(for:destination:).
             navigationAction.append(SomeModel())
         }
     }
+}
+```
+
+Map the items to their views with `nkNavigationDestination(for:destination:)`, which
+works like SwiftUI's `navigationDestination(for:destination:)` and also on the OS
+versions that do not have it:
+
+```swift
+NKNavigationStack {
+    FirstView()
+        .nkNavigationDestination(for: SomeModel.self) {
+            SecondView($0)
+        }
 }
 ```
 
@@ -99,6 +111,26 @@ Besides `append(_:)`, the `NavigationAction` offers `setItems(_:)`, `remove(_:)`
 `removeAll()`. Its `count` and `contains(_:)` describe the current stack, and
 `codable` exposes a serializable representation that can be passed back to
 the `NKNavigationStack(_:content:)` initializer to restore the stack.
+
+#### Before iOS 16, tvOS 16 and macOS 13
+
+`NavigationStack` and `NavigationPath` do not exist on iOS 15, tvOS 15 and macOS 12,
+so `NKNavigationStack` and `NKNavigationSplitView` use an equivalent implementation
+there. Your code is the same on every OS version, and the system implementation is
+still the one used where it is available. What is different on the earlier versions:
+
+- iOS and tvOS use a `NavigationView`; the items are shown one at a time, each one
+  after the previous push finishes, because the system ignores a push started while
+  another one is in progress. `setItems(_:)` with several items takes that many
+  transitions to show them all.
+- macOS 12 has no push navigation in `NavigationView`, so the items are stacked on top
+  of the content, with a back button in the toolbar.
+- The SwiftUI `navigationDestination(for:destination:)` is not available, so use
+  `nkNavigationDestination(for:destination:)`, which works on every version.
+- The `NKNavigationSplitView` initializers with `columnVisibility` need iOS 16,
+  tvOS 16 or macOS 13.
+- The `codable` representation of a stack is the same on every OS version, so one
+  saved on a version restores on any other.
 
 ### NKNavigationSplitView
 
@@ -207,7 +239,7 @@ ContentView()
 
 Use `sceneActionTransformer(for:closure:)` to map one action type into another
 and `navigationDestinationTransformer(for:closure:)` to map an item type into a
-destination registered with `navigationDestination(for:destination:)`.
+destination registered with `nkNavigationDestination(for:destination:)`.
 
 ### ObjectConnection
 
@@ -300,7 +332,7 @@ struct SecondCoordinator: View {
 ```
 
 ⚠️ The Observation framework requires iOS 17, tvOS 17, macOS 14, watchOS 10 or
-visionOS 1. NavigationKit itself keeps supporting iOS 16, tvOS 16, macOS 13 and
+visionOS 1. NavigationKit itself supports iOS 15, tvOS 15, macOS 12 and
 watchOS 9, where the `ObservableObject` approach above remains the way to go.
 `viewState(_:keyPath:)` also accepts an `@Observable` object.
 
