@@ -15,68 +15,73 @@ private struct SceneActionModifier<Action: Hashable>: ViewModifier {
     }
 
     func body(content: Content) -> some View {
-        let subscription = subscribe()
+        // The subscription lives as long as the view's state, not as long as the view is on screen,
+        // so a covered view (root of a stack with a destination on top, hidden tab) keeps receiving.
+        subscription.update(sceneAction: sceneAction, perform: action)
 
-        content
-            .task(id: sceneAction.id) { @MainActor [subscription, sceneAction, action] in
-                await subscription.consume(sceneAction, perform: action)
-            }
-    }
-
-    /// Subscribes while the view is being built, so an action performed between the view being
-    /// built and its `task` starting is not lost.
-    private func subscribe() -> SceneActionSubscription<Action> {
-        subscription.prepare(for: sceneAction)
-        return subscription
+        // SwiftUI does not evaluate this body when it returns `content` untouched (observed on macOS and
+        // iOS hosting views), so the no-op `onAppear` makes the modifier visible to the view graph.
+        return content.onAppear(perform: nil)
     }
 }
 
 /// Bridges a scene's async action stream to a view modifier.
+///
+/// Subscribes synchronously, the first time `update(sceneAction:perform:)` is called (while the
+/// view's `body` is evaluated), and consumes the stream from a long-lived task until the
+/// subscription is released, which happens when the view leaves the hierarchy. Appearing and
+/// disappearing have no effect on it.
 @MainActor
 final class SceneActionSubscription<Action: Hashable> {
 
-    typealias Iterator = BroadcastSequence<Action>.AsyncIterator
+    /// Cancels the task when released. Plain `deinit` on a `Sendable` box, so releasing the
+    /// subscription from any context cancels the consumer without needing an isolated `deinit`.
+    private final class Consumer: Sendable {
 
-    private var pending: (id: ObjectIdentifier, iterator: Iterator)?
-    private var consumer = 0
-    private var isConsuming = false
+        let task: Task<Void, Never>
 
-    func prepare(for sceneAction: SceneAction) {
-        // A running consumer already owns a subscription. A second one would only buffer
-        // actions that were already handled and replay them the next time the view appears.
-        guard !isConsuming, pending?.id != sceneAction.id else {
+        init(_ task: Task<Void, Never>) {
+            self.task = task
+        }
+
+        deinit {
+            task.cancel()
+        }
+    }
+
+    private var sceneActionID: ObjectIdentifier?
+    private var consumer: Consumer?
+    private var action: (@MainActor (Action) -> Void)?
+
+    /// Keeps the subscription attached to `sceneAction` and routes its actions to `action`.
+    ///
+    /// Safe to call on every `body` evaluation: the handler is replaced by the latest one so the
+    /// long-lived consumer never calls a stale closure, and the consumer is only replaced when
+    /// the scene changes.
+    func update(
+        sceneAction: SceneAction,
+        perform action: @escaping @MainActor (Action) -> Void
+    ) {
+        self.action = action
+
+        guard sceneActionID != sceneAction.id else {
             return
         }
 
-        pending = (sceneAction.id, sceneAction.values(for: Action.self).makeAsyncIterator())
-    }
+        sceneActionID = sceneAction.id
 
-    func consume(
-        _ sceneAction: SceneAction,
-        perform action: @MainActor (Action) -> Void
-    ) async {
-        var iterator: Iterator
+        // Created here, not inside the task: the subscription starts now, so nothing sent from
+        // this point on is missed, regardless of when the task gets to run.
+        var iterator = sceneAction.values(for: Action.self).makeAsyncIterator()
 
-        if let pending, pending.id == sceneAction.id {
-            iterator = pending.iterator
-        } else {
-            iterator = sceneAction.values(for: Action.self).makeAsyncIterator()
-        }
-
-        pending = nil
-        consumer += 1
-        isConsuming = true
-
-        let current = consumer
-        defer {
-            if consumer == current {
-                isConsuming = false
+        // Assigning replaces (and cancels) the consumer of the previous scene.
+        consumer = Consumer(
+            Task { @MainActor [weak self] in
+                while let value = await iterator.next() {
+                    self?.action?(value)
+                }
             }
-        }
-
-        while let value = await iterator.next() {
-            action(value)
-        }
+        )
     }
 }
 

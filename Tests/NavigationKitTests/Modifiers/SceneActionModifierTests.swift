@@ -138,5 +138,27 @@ class SceneActionModifierTests: XCTestCase {
         XCTAssertEqual(recorder.received, [5])
         window.close()
     }
+
+    func testModifier_whenViewIsRemovedFromTheHierarchy_shouldStopReceiving() async throws {
+        // Given
+        let sceneAction = SceneAction()
+        let recorder = Recorder()
+        let window = makeWindow(sceneAction: sceneAction, recorder: recorder)
+
+        try await Task.sleep(nanoseconds: 200_000_000)
+        sceneAction(1)
+        await waitUntil { recorder.received.count == 1 }
+
+        // When
+        window.contentView = nil
+        try await Task.sleep(nanoseconds: 300_000_000)
+
+        sceneAction(2)
+        try await Task.sleep(nanoseconds: 300_000_000)
+
+        // Then
+        XCTAssertEqual(recorder.received, [1])
+        window.close()
+    }
 }
 #endif
