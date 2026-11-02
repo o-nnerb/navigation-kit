@@ -10,7 +10,7 @@ and decouple views from the navigation flow.
 
 ## Requirements
 
-- Swift 6.3 or later
+- Swift 6.4 or later
 - iOS 16+, tvOS 16+, macOS 13+, watchOS 9+
 
 ## Installation
@@ -26,7 +26,7 @@ In Xcode, go to `File > Add Package Dependencies...`, then paste in
 2. Package.swift
 
 ```swift
-// swift-tools-version: 6.3
+// swift-tools-version: 6.4
 import PackageDescription
 
 let package = Package(
@@ -39,7 +39,7 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/o-nnerb/navigation-kit.git", from: "1.1.0")
+        .package(url: "https://github.com/o-nnerb/navigation-kit.git", from: "2.0.0")
     ],
     targets: [
         .target(
