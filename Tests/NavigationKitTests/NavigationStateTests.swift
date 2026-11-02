@@ -333,6 +333,13 @@ class FallbackNavigationStateTests: NavigationStateTests {
 @MainActor
 class FallbackNavigationStatePresentationTests: XCTestCase {
 
+    /// What the state asks the navigation about.
+    @MainActor
+    private final class FakeNavigation {
+        var isIdle = false
+        var landed = 0
+    }
+
     /// Sets the items and lets each one appear, like the views of the stack do.
     private func show(_ items: [Int], in state: FallbackNavigationState) async {
         state.setItems(items)
@@ -430,5 +437,44 @@ class FallbackNavigationStatePresentationTests: XCTestCase {
         XCTAssertEqual(state.displayedCount, 1)
         XCTAssertTrue(state.contains(1))
         XCTAssertFalse(state.contains(2))
+    }
+
+    func testState_whenTheNavigationIsNotIdle_shouldWaitToPush() async throws {
+        // Given
+        let state = FallbackNavigationState()
+        let navigation = FakeNavigation()
+        state.isReadyForPush = { _ in navigation.isIdle }
+
+        // When
+        state.append(1)
+
+        // Then
+        XCTAssertEqual(state.count, 1)
+        XCTAssertEqual(state.displayedCount, 0)
+
+        navigation.isIdle = true
+        await waitUntil { state.displayedCount == 1 }
+        XCTAssertEqual(state.displayedCount, 1)
+    }
+
+    func testState_whenTheNavigationIsIdle_shouldPushOneItemAtATimeAsItLands() async throws {
+        // Given
+        let state = FallbackNavigationState()
+        let navigation = FakeNavigation()
+        // The previous push has landed when the navigation shows as many items as the state says.
+        state.isReadyForPush = { displayedCount in navigation.landed == displayedCount }
+
+        // When
+        state.setItems([1, 2, 3])
+        XCTAssertEqual(state.displayedCount, 1)
+
+        // Then
+        navigation.landed = 1
+        await waitUntil { state.displayedCount == 2 }
+        XCTAssertEqual(state.displayedCount, 2)
+
+        navigation.landed = 2
+        await waitUntil { state.displayedCount == 3 }
+        XCTAssertEqual(state.displayedCount, 3)
     }
 }

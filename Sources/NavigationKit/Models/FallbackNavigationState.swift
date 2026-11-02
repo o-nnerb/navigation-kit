@@ -9,14 +9,27 @@ import SwiftUI
 @MainActor
 final class FallbackNavigationState: ObservableObject {
 
-    /// How long after the screen of an item appears (which is when its push starts) the next item can
-    /// be pushed. The navigation of the system ignores (and reports as dismissed) a push started
-    /// before the previous one is done, so the items are shown one at a time.
+    /// The navigation of the system ignores (and reports as dismissed) a push started before the
+    /// previous one is done, so the items are shown one at a time.
+    ///
+    /// When the stack knows its `UINavigationController` (`isReadyForPush`) the next push waits for
+    /// that to be idle. Otherwise it is a matter of time: the next item can be pushed this long after
+    /// the screen of the previous one appears (which is when its push starts),
     private static let settleDelay: TimeInterval = 0.5
 
-    /// How long to wait for the screen of an item to appear before pushing the next one anyway, for
-    /// when it never does (for example, a detail that is not on screen).
+    /// and this long after it was pushed when its screen never appears (for example, a detail that is
+    /// not on screen).
     private static let appearTimeout: TimeInterval = 1.5
+
+    /// How often to ask whether the navigation is idle, and for how long before giving up and pushing
+    /// anyway (for example, when the detail is not the one being shown).
+    private static let readinessInterval: TimeInterval = 0.05
+    private static let readinessTimeout: TimeInterval = 3
+
+    /// Tells whether the navigation can start a push, given how many items are being shown: no
+    /// transition is in progress and the previous push has landed. Set by the view of the stack
+    /// once it finds its `UINavigationController`.
+    var isReadyForPush: (@MainActor (_ displayedCount: Int) -> Bool)?
 
     private(set) var entries = [NavigationEntry]()
 
@@ -27,6 +40,7 @@ final class FallbackNavigationState: ObservableObject {
     private var lastPendingNavigationItemsHashValue: Int?
     private var lastPush: Date?
     private var lastAppear: Date?
+    private var waitingForReadinessSince: Date?
     private var reconciliation: Task<Void, Never>?
 
     init() {}
@@ -104,11 +118,28 @@ final class FallbackNavigationState: ObservableObject {
     }
 
     private func waitBeforeNextPush() -> TimeInterval {
+        let now = Date()
+
+        if let isReadyForPush {
+            if isReadyForPush(displayedCount) {
+                waitingForReadinessSince = nil
+                return 0
+            }
+
+            let since = waitingForReadinessSince ?? now
+            waitingForReadinessSince = since
+
+            if now.timeIntervalSince(since) >= Self.readinessTimeout {
+                waitingForReadinessSince = nil
+                return 0
+            }
+
+            return Self.readinessInterval
+        }
+
         guard let lastPush else {
             return 0
         }
-
-        let now = Date()
 
         if let lastAppear, lastAppear >= lastPush {
             return max(Self.settleDelay - now.timeIntervalSince(lastAppear), 0)

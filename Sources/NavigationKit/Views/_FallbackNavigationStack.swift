@@ -96,6 +96,11 @@ extension _FallbackNavigationStack {
 
     private var links: some View {
         content
+            .background(
+                _FallbackNavigationControllerReader(state: state)
+                    .frame(width: 0, height: 0)
+                    .allowsHitTesting(false)
+            )
             .backgroundPreferenceValue(FallbackDestinationsKey.self) { destinations in
                 _FallbackStackLink(
                     state: state,
@@ -119,6 +124,72 @@ private final class FallbackEntryBox {
         }
 
         return self.entry
+    }
+}
+
+/// Finds the `UINavigationController` behind the `NavigationView`, to ask it whether a push can start.
+///
+/// The system ignores a push started during another one, and how long a transition takes depends on
+/// the device, so the stack waits for the navigation to be idle instead of guessing.
+private struct _FallbackNavigationControllerReader: UIViewControllerRepresentable {
+
+    let state: FallbackNavigationState
+
+    func makeUIViewController(context: Context) -> Controller {
+        Controller(state: state)
+    }
+
+    func updateUIViewController(_ controller: Controller, context: Context) {}
+
+    final class Controller: UIViewController {
+
+        private let state: FallbackNavigationState
+
+        init(state: FallbackNavigationState) {
+            self.state = state
+            super.init(nibName: nil, bundle: nil)
+        }
+
+        required init?(coder: NSCoder) {
+            fatalError("init(coder:) has not been implemented")
+        }
+
+        override func didMove(toParent parent: UIViewController?) {
+            super.didMove(toParent: parent)
+            attach()
+        }
+
+        override func viewDidAppear(_ animated: Bool) {
+            super.viewDidAppear(animated)
+            attach()
+        }
+
+        private func attach() {
+            guard let navigationController else {
+                return
+            }
+
+            // The view controller of the navigation that holds this view: the ones pushed by the
+            // stack come after it.
+            var root: UIViewController? = self
+
+            while let current = root, !navigationController.viewControllers.contains(current) {
+                root = current.parent
+            }
+
+            guard let root, let index = navigationController.viewControllers.firstIndex(of: root) else {
+                return
+            }
+
+            state.isReadyForPush = { [weak navigationController] displayedCount in
+                guard let navigationController else {
+                    return true
+                }
+
+                return navigationController.transitionCoordinator == nil
+                    && navigationController.viewControllers.count == index + 1 + displayedCount
+            }
+        }
     }
 }
 
