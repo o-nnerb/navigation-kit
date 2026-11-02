@@ -1,14 +1,14 @@
 // Copyright 2026 Brenno Giovanini de Moura
 // SPDX-License-Identifier: MIT
 
-import XCTest
+import Testing
 
 @testable import NavigationKit
 
 @MainActor
-class SceneTransactionTests: XCTestCase {
+@Suite struct SceneTransactionTests {
 
-    func testSceneTransaction_whenTwoFired_shouldTransactionToTwoElements() async throws {
+    @Test func sceneTransaction_whenTwoFired_shouldTransactionToTwoElements() async throws {
         // Given
         let sut = SceneTransaction<Int>()
 
@@ -20,10 +20,10 @@ class SceneTransactionTests: XCTestCase {
 
         // Then
         let values = [await iterator.next(), await iterator.next()]
-        XCTAssertEqual(values, [1, 2])
+        #expect(values == [1, 2])
     }
 
-    func testSceneTransaction_whenTwoSubscribers_shouldDeliverToBoth() async throws {
+    @Test func sceneTransaction_whenTwoSubscribers_shouldDeliverToBoth() async throws {
         // Given
         let sut = SceneTransaction<Int>()
 
@@ -35,10 +35,10 @@ class SceneTransactionTests: XCTestCase {
 
         // Then
         let values = [await first.next(), await second.next()]
-        XCTAssertEqual(values, [1, 1])
+        #expect(values == [1, 1])
     }
 
-    func testSceneTransaction_whenFiredBeforeSubscription_shouldNotReplay() async throws {
+    @Test func sceneTransaction_whenFiredBeforeSubscription_shouldNotReplay() async throws {
         // Given
         let sut = SceneTransaction<Int>()
         sut(1)
@@ -49,10 +49,10 @@ class SceneTransactionTests: XCTestCase {
 
         // Then
         let value = await iterator.next()
-        XCTAssertEqual(value, 2)
+        #expect(value == 2)
     }
 
-    func testSceneTransaction_whenCopied_shouldShareSubscribers() async throws {
+    @Test func sceneTransaction_whenCopied_shouldShareSubscribers() async throws {
         // Given
         let sut = SceneTransaction<Int>()
         let copy = sut
@@ -63,11 +63,11 @@ class SceneTransactionTests: XCTestCase {
 
         // Then
         let value = await iterator.next()
-        XCTAssertEqual(sut, copy)
-        XCTAssertEqual(value, 5)
+        #expect(sut == copy)
+        #expect(value == 5)
     }
 
-    func testSceneTransaction_whenIteratingTaskIsCancelled_shouldFinishSequence() async throws {
+    @Test func sceneTransaction_whenIteratingTaskIsCancelled_shouldFinishSequence() async throws {
         // Given
         let sut = SceneTransaction<Int>()
         let values = sut.values
@@ -85,10 +85,10 @@ class SceneTransactionTests: XCTestCase {
 
         // Then
         let received = await task.value
-        XCTAssertTrue(received.isEmpty)
+        #expect(received.isEmpty)
     }
 
-    func testSceneTransaction_whenFiredFromAnotherTask_shouldBeObservedByAnotherTask() async throws {
+    @Test func sceneTransaction_whenFiredFromAnotherTask_shouldBeObservedByAnotherTask() async throws {
         // Given
         let sut = SceneTransaction<Int>()
         let iterator = sut.values.makeAsyncIterator()
@@ -105,6 +105,6 @@ class SceneTransactionTests: XCTestCase {
 
         // Then
         let received = await task.value
-        XCTAssertEqual(received, [1, 2])
+        #expect(received == [1, 2])
     }
 }

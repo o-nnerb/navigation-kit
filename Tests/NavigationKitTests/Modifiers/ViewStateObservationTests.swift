@@ -4,25 +4,27 @@
 #if canImport(AppKit) || (canImport(UIKit) && !os(watchOS))
 import Observation
 import SwiftUI
-import XCTest
+import Testing
 
 @testable import NavigationKit
 
-@available(iOS 17.0, macOS 14.0, tvOS 17.0, visionOS 1.0, *)
 @MainActor
-class ViewStateObservationTests: XCTestCase {
+@Suite struct ViewStateObservationTests {
 
+    @available(iOS 17.0, macOS 14.0, tvOS 17.0, visionOS 1.0, *)
     @Observable
     @MainActor
     final class Model {
         var viewState: ViewState = .inactive
     }
 
+    @available(iOS 17.0, macOS 14.0, tvOS 17.0, visionOS 1.0, *)
     @MainActor
     private final class Recorder {
         var rendered = [ViewState]()
     }
 
+    @available(iOS 17.0, macOS 14.0, tvOS 17.0, visionOS 1.0, *)
     private struct Host: View {
 
         let model: Model
@@ -37,7 +39,8 @@ class ViewStateObservationTests: XCTestCase {
         }
     }
 
-    func testViewState_whenModelIsObservable_shouldBecomeActiveAndRenderAgain() async throws {
+    @available(iOS 17.0, macOS 14.0, tvOS 17.0, visionOS 1.0, *)
+    @Test func viewState_whenModelIsObservable_shouldBecomeActiveAndRenderAgain() async throws {
         // Given
         let model = Model()
         let recorder = Recorder()
@@ -48,9 +51,9 @@ class ViewStateObservationTests: XCTestCase {
         await waitUntil { recorder.rendered.last == .active }
 
         // Then
-        XCTAssertEqual(model.viewState, .active)
-        XCTAssertEqual(recorder.rendered.last, .active)
-        XCTAssertNotNil(window)
+        #expect(model.viewState == .active)
+        #expect(recorder.rendered.last == .active)
+        withExtendedLifetime(window) {}
     }
 }
 #endif

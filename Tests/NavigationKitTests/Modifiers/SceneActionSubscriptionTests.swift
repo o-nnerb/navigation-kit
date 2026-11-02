@@ -1,12 +1,12 @@
 // Copyright 2026 Brenno Giovanini de Moura
 // SPDX-License-Identifier: MIT
 
-import XCTest
+import Testing
 
 @testable import NavigationKit
 
 @MainActor
-class SceneActionSubscriptionTests: XCTestCase {
+@Suite struct SceneActionSubscriptionTests {
 
     private final class Recorder {
         var received = [Int]()
@@ -22,7 +22,7 @@ class SceneActionSubscriptionTests: XCTestCase {
         try await Task.sleep(nanoseconds: 50_000_000)
     }
 
-    func testSubscription_whenUpdatedBeforeTheConsumerRuns_shouldReceiveActionPerformedInBetween() async throws {
+    @Test func subscription_whenUpdatedBeforeTheConsumerRuns_shouldReceiveActionPerformedInBetween() async throws {
         // Given
         let sut = SceneActionSubscription<Int>()
         let sceneAction = SceneAction()
@@ -36,10 +36,10 @@ class SceneActionSubscriptionTests: XCTestCase {
         await waitUntil { recorder.received.count == 2 }
 
         // Then
-        XCTAssertEqual(recorder.received, [1, 2])
+        #expect(recorder.received == [1, 2])
     }
 
-    func testSubscription_whenUpdatedAgain_shouldCallTheLatestHandlerOnly() async throws {
+    @Test func subscription_whenUpdatedAgain_shouldCallTheLatestHandlerOnly() async throws {
         // Given
         let sut = SceneActionSubscription<Int>()
         let sceneAction = SceneAction()
@@ -55,11 +55,11 @@ class SceneActionSubscriptionTests: XCTestCase {
         await waitUntil { second.received.count == 1 }
 
         // Then
-        XCTAssertEqual(first.received, [])
-        XCTAssertEqual(second.received, [1])
+        #expect(first.received == [])
+        #expect(second.received == [1])
     }
 
-    func testSubscription_whenUpdatedAgainWithSameScene_shouldNotReplayHandledActions() async throws {
+    @Test func subscription_whenUpdatedAgainWithSameScene_shouldNotReplayHandledActions() async throws {
         // Given
         let sut = SceneActionSubscription<Int>()
         let sceneAction = SceneAction()
@@ -76,10 +76,10 @@ class SceneActionSubscriptionTests: XCTestCase {
         try await settle()
 
         // Then
-        XCTAssertEqual(recorder.received, [1, 2])
+        #expect(recorder.received == [1, 2])
     }
 
-    func testSubscription_whenSceneActionChanges_shouldListenToTheNewOne() async throws {
+    @Test func subscription_whenSceneActionChanges_shouldListenToTheNewOne() async throws {
         // Given
         let sut = SceneActionSubscription<Int>()
         let old = SceneAction()
@@ -97,10 +97,10 @@ class SceneActionSubscriptionTests: XCTestCase {
         try await settle()
 
         // Then
-        XCTAssertEqual(recorder.received, [2])
+        #expect(recorder.received == [2])
     }
 
-    func testSubscription_whenReleased_shouldStopConsuming() async throws {
+    @Test func subscription_whenReleased_shouldStopConsuming() async throws {
         // Given
         var sut: SceneActionSubscription<Int>? = .init()
         weak let weakSut = sut
@@ -117,7 +117,7 @@ class SceneActionSubscriptionTests: XCTestCase {
         try await settle()
 
         // Then
-        XCTAssertNil(weakSut)
-        XCTAssertEqual(recorder.received, [1])
+        #expect(weakSut == nil)
+        #expect(recorder.received == [1])
     }
 }

@@ -3,89 +3,86 @@
 
 #if canImport(AppKit) || (canImport(UIKit) && !os(watchOS))
 import SwiftUI
-import XCTest
+import Testing
 
 @testable import NavigationKit
 
-/// A stack that starts with items has to find them again, and to keep the others when one is removed.
-@MainActor
-class NavigationStackInitialItemsTests: XCTestCase {
-
+extension NavigationStackSuites {
+    /// A stack that starts with items has to find them again, and to keep the others when one is removed.
     @MainActor
-    private final class Recorder {
-        var action: NavigationAction?
-    }
+    @Suite struct NavigationStackInitialItemsTests {
 
-    private struct Root: View {
-
-        @Environment(\.navigationAction) var navigationAction
-        let recorder: Recorder
-
-        var body: some View {
-            Color.clear
-                .frame(width: 50, height: 50)
-                .onAppear { recorder.action = navigationAction }
-                .nkNavigationDestination(for: Int.self) { _ in
-                    Color.clear.frame(width: 50, height: 50)
-                }
+        @MainActor
+        private final class Recorder {
+            var action: NavigationAction?
         }
-    }
 
-    override func tearDown() async throws {
-        NavigationBackend.forcesFallback = false
-    }
+        private struct Root: View {
 
-    private func hostStack(
-        _ recorder: Recorder,
-        items: [Int]
-    ) async -> AnyObject {
-        let window = hostInWindow(
-            NKNavigationStack(items) {
-                Root(recorder: recorder)
+            @Environment(\.navigationAction) var navigationAction
+            let recorder: Recorder
+
+            var body: some View {
+                Color.clear
+                    .frame(width: 50, height: 50)
+                    .onAppear { recorder.action = navigationAction }
+                    .nkNavigationDestination(for: Int.self) { _ in
+                        Color.clear.frame(width: 50, height: 50)
+                    }
             }
-        )
+        }
 
-        await waitUntil { recorder.action != nil }
-        return window
+        private func hostStack(
+            _ recorder: Recorder,
+            items: [Int]
+        ) async -> AnyObject {
+            let window = hostInWindow(
+                NKNavigationStack(items) {
+                    Root(recorder: recorder)
+                }
+            )
+
+            await waitUntil { recorder.action != nil }
+            return window
+        }
+
+        private func assertRemovingKeepsTheOthers(_ recorder: Recorder) async throws {
+            // Given
+            let action = try #require(recorder.action)
+            #expect(action.count == 3)
+            #expect(action.contains(2))
+
+            // When
+            action.remove(2)
+
+            // Then
+            #expect(action.count == 2)
+            #expect(action.contains(1))
+            #expect(!action.contains(2))
+            #expect(action.contains(3))
+        }
+
+        @Test func stack_whenItStartsWithItems_shouldRemoveOneKeepingTheOthers() async throws {
+            // Given
+            let recorder = Recorder()
+            let window = await hostStack(recorder, items: [1, 2, 3])
+
+            // Then
+            try await assertRemovingKeepsTheOthers(recorder)
+            withExtendedLifetime(window) {}
+        }
+
+        #if os(iOS) || os(tvOS) || os(macOS)
+        @Test(.forcedFallback) func fallbackStack_whenItStartsWithItems_shouldRemoveOneKeepingTheOthers() async throws {
+            // Given
+            let recorder = Recorder()
+            let window = await hostStack(recorder, items: [1, 2, 3])
+
+            // Then
+            try await assertRemovingKeepsTheOthers(recorder)
+            withExtendedLifetime(window) {}
+        }
+        #endif
     }
-
-    private func assertRemovingKeepsTheOthers(_ recorder: Recorder) async throws {
-        // Given
-        let action = try XCTUnwrap(recorder.action)
-        XCTAssertEqual(action.count, 3)
-        XCTAssertTrue(action.contains(2))
-
-        // When
-        action.remove(2)
-
-        // Then
-        XCTAssertEqual(action.count, 2)
-        XCTAssertTrue(action.contains(1))
-        XCTAssertFalse(action.contains(2))
-        XCTAssertTrue(action.contains(3))
-    }
-
-    func testStack_whenItStartsWithItems_shouldRemoveOneKeepingTheOthers() async throws {
-        // Given
-        let recorder = Recorder()
-        let window = await hostStack(recorder, items: [1, 2, 3])
-
-        // Then
-        try await assertRemovingKeepsTheOthers(recorder)
-        XCTAssertNotNil(window)
-    }
-
-    #if os(iOS) || os(tvOS) || os(macOS)
-    func testFallbackStack_whenItStartsWithItems_shouldRemoveOneKeepingTheOthers() async throws {
-        // Given
-        NavigationBackend.forcesFallback = true
-        let recorder = Recorder()
-        let window = await hostStack(recorder, items: [1, 2, 3])
-
-        // Then
-        try await assertRemovingKeepsTheOthers(recorder)
-        XCTAssertNotNil(window)
-    }
-    #endif
 }
 #endif

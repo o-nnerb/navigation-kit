@@ -4,12 +4,12 @@
 #if canImport(UIKit) && !os(watchOS)
 import SwiftUI
 import UIKit
-import XCTest
+import Testing
 
 @testable import NavigationKit
 
 @MainActor
-class SceneActionModifierUIKitTests: XCTestCase {
+@Suite struct SceneActionModifierUIKitTests {
 
     private final class Recorder {
         var received = [Int]()
@@ -64,7 +64,7 @@ class SceneActionModifierUIKitTests: XCTestCase {
         }
     }
 
-    func testModifier_whenActionIsFiredFromChildOnAppear_shouldBePerformed() async throws {
+    @Test func modifier_whenActionIsFiredFromChildOnAppear_shouldBePerformed() async throws {
         // Given
         let sceneAction = SceneAction()
         let recorder = Recorder()
@@ -74,11 +74,11 @@ class SceneActionModifierUIKitTests: XCTestCase {
         await waitUntil { !recorder.received.isEmpty }
 
         // Then
-        XCTAssertEqual(recorder.received, [7])
+        #expect(recorder.received == [7])
         window.isHidden = true
     }
 
-    func testModifier_whenActionIsFiredRightAfterHosting_shouldBePerformed() async throws {
+    @Test func modifier_whenActionIsFiredRightAfterHosting_shouldBePerformed() async throws {
         // Given
         let sceneAction = SceneAction()
         let recorder = Recorder()
@@ -89,7 +89,7 @@ class SceneActionModifierUIKitTests: XCTestCase {
         await waitUntil { recorder.received.count == 2 }
 
         // Then
-        XCTAssertEqual(recorder.received.sorted(), [1, 2])
+        #expect(recorder.received.sorted() == [1, 2])
         window.isHidden = true
     }
 }

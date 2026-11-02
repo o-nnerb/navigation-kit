@@ -4,14 +4,14 @@
 #if canImport(AppKit) || (canImport(UIKit) && !os(watchOS))
 import Observation
 import SwiftUI
-import XCTest
+import Testing
 
 @testable import NavigationKit
 
-@available(iOS 17.0, macOS 14.0, tvOS 17.0, visionOS 1.0, *)
 @MainActor
-class ObjectConnectionObservationTests: XCTestCase {
+@Suite struct ObjectConnectionObservationTests {
 
+    @available(iOS 17.0, macOS 14.0, tvOS 17.0, visionOS 1.0, *)
     @Observable
     @MainActor
     final class Model {
@@ -24,6 +24,7 @@ class ObjectConnectionObservationTests: XCTestCase {
         }
     }
 
+    @available(iOS 17.0, macOS 14.0, tvOS 17.0, visionOS 1.0, *)
     @MainActor
     private final class Recorder {
 
@@ -38,6 +39,7 @@ class ObjectConnectionObservationTests: XCTestCase {
         }
     }
 
+    @available(iOS 17.0, macOS 14.0, tvOS 17.0, visionOS 1.0, *)
     private struct Host: View {
 
         let recorder: Recorder
@@ -63,7 +65,8 @@ class ObjectConnectionObservationTests: XCTestCase {
         }
     }
 
-    func testConnection_whenModelIsObservable_shouldCreateModelOnce() async throws {
+    @available(iOS 17.0, macOS 14.0, tvOS 17.0, visionOS 1.0, *)
+    @Test func connection_whenModelIsObservable_shouldCreateModelOnce() async throws {
         // Given
         let recorder = Recorder()
 
@@ -76,11 +79,12 @@ class ObjectConnectionObservationTests: XCTestCase {
         try await Task.sleep(nanoseconds: 200_000_000)
 
         // Then
-        XCTAssertEqual(recorder.created, [1])
-        XCTAssertNotNil(window)
+        #expect(recorder.created == [1])
+        withExtendedLifetime(window) {}
     }
 
-    func testConnection_whenObservablePropertyChanges_shouldRenderContentAgain() async throws {
+    @available(iOS 17.0, macOS 14.0, tvOS 17.0, visionOS 1.0, *)
+    @Test func connection_whenObservablePropertyChanges_shouldRenderContentAgain() async throws {
         // Given
         let recorder = Recorder()
 
@@ -92,11 +96,12 @@ class ObjectConnectionObservationTests: XCTestCase {
         await waitUntil { recorder.rendered.last == "1:7" }
 
         // Then
-        XCTAssertEqual(recorder.rendered.last, "1:7")
-        XCTAssertNotNil(window)
+        #expect(recorder.rendered.last == "1:7")
+        withExtendedLifetime(window) {}
     }
 
-    func testConnection_whenInputChanges_shouldCreateANewObservableModel() async throws {
+    @available(iOS 17.0, macOS 14.0, tvOS 17.0, visionOS 1.0, *)
+    @Test func connection_whenInputChanges_shouldCreateANewObservableModel() async throws {
         // Given
         let recorder = Recorder()
         let window = hostInWindow(Host(recorder: recorder))
@@ -110,15 +115,15 @@ class ObjectConnectionObservationTests: XCTestCase {
         await waitUntil { recorder.rendered.last == "2:0" }
 
         // Then
-        XCTAssertEqual(recorder.created, [1, 2])
-        XCTAssertEqual(recorder.rendered.last, "2:0")
-        XCTAssertNotNil(window)
+        #expect(recorder.created == [1, 2])
+        #expect(recorder.rendered.last == "2:0")
+        withExtendedLifetime(window) {}
 
         // And the new model is the one observed
         await waitUntil { recorder.model !== first }
         recorder.model?.count = 9
         await waitUntil { recorder.rendered.last == "2:9" }
-        XCTAssertEqual(recorder.rendered.last, "2:9")
+        #expect(recorder.rendered.last == "2:9")
     }
 }
 #endif

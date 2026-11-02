@@ -1,13 +1,13 @@
 // Copyright 2026 Brenno Giovanini de Moura
 // SPDX-License-Identifier: MIT
 
-import XCTest
+import Testing
 
 @testable import NavigationKit
 
-class ClosureTests: XCTestCase {
+@Suite struct ClosureTests {
 
-    func testClosure_whenParameterIsInt_shouldBeInt() {
+    @Test func closure_whenParameterIsInt_shouldBeInt() {
         // Given
         var value: Int?
         let closure = Closure<Int, Void>.closure {
@@ -18,10 +18,10 @@ class ClosureTests: XCTestCase {
         closure(1)
 
         // Then
-        XCTAssertEqual(value, 1)
+        #expect(value == 1)
     }
 
-    func testClosure_whenParameterIsVoid_shouldExecute() {
+    @Test func closure_whenParameterIsVoid_shouldExecute() {
         // Given
         var wasCalled = false
         let closure = Closure<Void, Void>.closure {
@@ -32,10 +32,10 @@ class ClosureTests: XCTestCase {
         closure()
 
         // Then
-        XCTAssertTrue(wasCalled)
+        #expect(wasCalled)
     }
 
-    func testClosure_whenParameterIsTuple_shouldBeEqual() {
+    @Test func closure_whenParameterIsTuple_shouldBeEqual() {
         // Given
         var value: (Int, Bool, String)?
         let closure = Closure<(Int, Bool, String), Void>.closure {
@@ -46,12 +46,12 @@ class ClosureTests: XCTestCase {
         closure(.zero, true, "Hello World")
 
         // Then
-        XCTAssertEqual(value?.0, .zero)
-        XCTAssertEqual(value?.1, true)
-        XCTAssertEqual(value?.2, "Hello World")
+        #expect(value?.0 == .zero)
+        #expect(value?.1 == true)
+        #expect(value?.2 == "Hello World")
     }
 
-    func testClosure_whenParameterIsVoid_shouldReturnBool() {
+    @Test func closure_whenParameterIsVoid_shouldReturnBool() {
         // Given
         let closure = Closure<Void, Bool>.closure {
             true
@@ -61,6 +61,6 @@ class ClosureTests: XCTestCase {
         let value = closure()
 
         // Then
-        XCTAssertTrue(value)
+        #expect(value)
     }
 }

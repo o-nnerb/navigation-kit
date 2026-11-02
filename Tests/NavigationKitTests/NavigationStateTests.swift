@@ -2,29 +2,65 @@
 // SPDX-License-Identifier: MIT
 
 import SwiftUI
-import XCTest
+import Testing
 
 @testable import NavigationKit
 
-/// The behaviour every navigation state has to provide. Run against the system implementation and
-/// the fallback one, which have to behave the same.
+/// How to build a navigation state and give it the items a stack starts with, like the stack view does.
+struct NavigationStateHarness: Sendable, CustomTestStringConvertible {
+
+    let name: String
+    let makeState: @MainActor @Sendable () -> NavigationStateProtocol
+    let apply: @MainActor @Sendable (PendingNavigationItems, NavigationStateProtocol) -> Void
+
+    var testDescription: String { name }
+
+    /// The system implementation and the fallback one, which have to behave the same.
+    static var all: [NavigationStateHarness] {
+        var harnesses = [fallback]
+
+        if #available(iOS 16.0, tvOS 16.0, macOS 13.0, *) {
+            harnesses.insert(system, at: 0)
+        }
+
+        return harnesses
+    }
+
+    @available(iOS 16.0, tvOS 16.0, macOS 13.0, *)
+    private static var system: NavigationStateHarness {
+        NavigationStateHarness(
+            name: "NavigationState",
+            makeState: { NavigationState() },
+            apply: { pendingItems, state in
+                guard let state = state as? NavigationState else {
+                    Issue.record("Expected a NavigationState")
+                    return
+                }
+
+                _ = state[pendingItems]
+            }
+        )
+    }
+
+    private static var fallback: NavigationStateHarness {
+        NavigationStateHarness(
+            name: "FallbackNavigationState",
+            makeState: { FallbackNavigationState() },
+            apply: { pendingItems, state in
+                guard let state = state as? FallbackNavigationState else {
+                    Issue.record("Expected a FallbackNavigationState")
+                    return
+                }
+
+                state.update(pendingItems)
+            }
+        )
+    }
+}
+
+/// The behaviour every navigation state has to provide, checked against each harness.
 @MainActor
-class NavigationStateTests: XCTestCase {
-
-    /// The suite itself is abstract: only its subclasses run.
-    override class var defaultTestSuite: XCTestSuite {
-        self == NavigationStateTests.self
-            ? XCTestSuite(name: "NavigationStateTests (abstract)") : super.defaultTestSuite
-    }
-
-    func makeState() -> NavigationStateProtocol {
-        fatalError("Override makeState()")
-    }
-
-    /// Gives `state` the items a stack starts with, like the stack view does.
-    func apply(_ pendingItems: PendingNavigationItems, to state: NavigationStateProtocol) {
-        fatalError("Override apply(_:to:)")
-    }
+@Suite struct NavigationStateTests {
 
     /// A representation as saved by another launch of the app: `hashValue` is different on each
     /// launch, so the saved hashes mean nothing to this one.
@@ -37,17 +73,19 @@ class NavigationStateTests: XCTestCase {
         )
     }
 
-    func testNavigationState_whenEmpty_shouldBeEmpty() async throws {
+    @Test(arguments: NavigationStateHarness.all)
+    func navigationState_whenEmpty_shouldBeEmpty(_ harness: NavigationStateHarness) async throws {
         // Given
-        let navigationState = makeState()
+        let navigationState = harness.makeState()
 
         // Then
-        XCTAssertEqual(navigationState.count, .zero)
+        #expect(navigationState.count == .zero)
     }
 
-    func testNavigationState_whenAppendItems_shouldContainsItems() async throws {
+    @Test(arguments: NavigationStateHarness.all)
+    func navigationState_whenAppendItems_shouldContainsItems(_ harness: NavigationStateHarness) async throws {
         // Given
-        let navigationState = makeState()
+        let navigationState = harness.makeState()
         let items = [1, 2, 3]
 
         // When
@@ -56,12 +94,13 @@ class NavigationStateTests: XCTestCase {
         }
 
         // Then
-        XCTAssertEqual(navigationState.count, items.count)
+        #expect(navigationState.count == items.count)
     }
 
-    func testNavigationState_whenAppendItems_shouldRemoveItem() async throws {
+    @Test(arguments: NavigationStateHarness.all)
+    func navigationState_whenAppendItems_shouldRemoveItem(_ harness: NavigationStateHarness) async throws {
         // Given
-        let navigationState = makeState()
+        let navigationState = harness.makeState()
         let item = 1
         let items = [item, 2, 3]
 
@@ -73,12 +112,13 @@ class NavigationStateTests: XCTestCase {
         navigationState.remove(item)
 
         // Then
-        XCTAssertEqual(navigationState.count, items.count - 1)
+        #expect(navigationState.count == items.count - 1)
     }
 
-    func testNavigationState_whenAppendItems_shouldRemoveUntilItem() async throws {
+    @Test(arguments: NavigationStateHarness.all)
+    func navigationState_whenAppendItems_shouldRemoveUntilItem(_ harness: NavigationStateHarness) async throws {
         // Given
-        let navigationState = makeState()
+        let navigationState = harness.makeState()
         let item = 2
         let items = [1, item, 3, 4]
 
@@ -92,13 +132,14 @@ class NavigationStateTests: XCTestCase {
         // Then
         let index: Int! = items.firstIndex(of: item)
 
-        XCTAssertNotNil(index)
-        XCTAssertEqual(navigationState.count, index + 1)
+        #expect(index != nil)
+        #expect(navigationState.count == index + 1)
     }
 
-    func testNavigationState_whenAppendItems_shouldRemoveIncludingItem() async throws {
+    @Test(arguments: NavigationStateHarness.all)
+    func navigationState_whenAppendItems_shouldRemoveIncludingItem(_ harness: NavigationStateHarness) async throws {
         // Given
-        let navigationState = makeState()
+        let navigationState = harness.makeState()
         let item = 2
         let items = [1, item, 3, 4]
 
@@ -112,25 +153,27 @@ class NavigationStateTests: XCTestCase {
         // Then
         let index: Int! = items.firstIndex(of: item)
 
-        XCTAssertNotNil(index)
-        XCTAssertEqual(navigationState.count, index)
+        #expect(index != nil)
+        #expect(navigationState.count == index)
     }
 
-    func testNavigationState_whenSetItems_shouldBeEqual() async throws {
+    @Test(arguments: NavigationStateHarness.all)
+    func navigationState_whenSetItems_shouldBeEqual(_ harness: NavigationStateHarness) async throws {
         // Given
-        let navigationState = makeState()
+        let navigationState = harness.makeState()
         let items = [1, 2, 3, 4]
 
         // When
         navigationState.setItems(items)
 
         // Then
-        XCTAssertEqual(navigationState.count, items.count)
+        #expect(navigationState.count == items.count)
     }
 
-    func testNavigationState_whenSetItems_shouldRemoveAll() async throws {
+    @Test(arguments: NavigationStateHarness.all)
+    func navigationState_whenSetItems_shouldRemoveAll(_ harness: NavigationStateHarness) async throws {
         // Given
-        let navigationState = makeState()
+        let navigationState = harness.makeState()
         let items = [1, 2, 3, 4]
 
         // When
@@ -138,12 +181,13 @@ class NavigationStateTests: XCTestCase {
         navigationState.removeAll()
 
         // Then
-        XCTAssertEqual(navigationState.count, .zero)
+        #expect(navigationState.count == .zero)
     }
 
-    func testNavigationState_whenRemoveLastItem_shouldBeOneItemLeft() async throws {
+    @Test(arguments: NavigationStateHarness.all)
+    func navigationState_whenRemoveLastItem_shouldBeOneItemLeft(_ harness: NavigationStateHarness) async throws {
         // Given
-        let navigationState = makeState()
+        let navigationState = harness.makeState()
         let items = [1, 2, 3, 4]
 
         // When
@@ -154,12 +198,13 @@ class NavigationStateTests: XCTestCase {
         navigationState.removeLast()
 
         // Then
-        XCTAssertEqual(navigationState.count, items.count - 1)
+        #expect(navigationState.count == items.count - 1)
     }
 
-    func testNavigationState_whenRemoveLastTwoItems_shouldBeTwoItemLeft() async throws {
+    @Test(arguments: NavigationStateHarness.all)
+    func navigationState_whenRemoveLastTwoItems_shouldBeTwoItemLeft(_ harness: NavigationStateHarness) async throws {
         // Given
-        let navigationState = makeState()
+        let navigationState = harness.makeState()
         let items = [1, 2, 3, 4]
 
         // When
@@ -170,12 +215,13 @@ class NavigationStateTests: XCTestCase {
         navigationState.removeLast(2)
 
         // Then
-        XCTAssertEqual(navigationState.count, items.count - 2)
+        #expect(navigationState.count == items.count - 2)
     }
 
-    func testNavigationState_whenSetItems_shouldCodableBeEqual() async throws {
+    @Test(arguments: NavigationStateHarness.all)
+    func navigationState_whenSetItems_shouldCodableBeEqual(_ harness: NavigationStateHarness) async throws {
         // Given
-        let navigationState = makeState()
+        let navigationState = harness.makeState()
         let items = [1, 2, 3, 4]
 
         let encoder = JSONEncoder()
@@ -185,153 +231,133 @@ class NavigationStateTests: XCTestCase {
         navigationState.setItems(items)
 
         // Then
-        XCTAssertEqual(
-            try navigationState.codable.map { try encoder.encode($0) },
-            try encoder.encode(
-                NavigationAction.CodableRepresentation(
-                    navigationPath: [
-                        "Swift.Int", "4",
-                        "Swift.Int", "3",
-                        "Swift.Int", "2",
-                        "Swift.Int", "1",
-                    ],
-                    hashes: items.map(\.hashValue)
-                )
+        let encoded = try navigationState.codable.map { try encoder.encode($0) }
+        let expected = try encoder.encode(
+            NavigationAction.CodableRepresentation(
+                navigationPath: [
+                    "Swift.Int", "4",
+                    "Swift.Int", "3",
+                    "Swift.Int", "2",
+                    "Swift.Int", "1",
+                ],
+                hashes: items.map(\.hashValue)
             )
         )
+
+        #expect(encoded == expected)
     }
 
-    func testNavigationState_whenItemsAreNotCodable_shouldNotHaveCodable() async throws {
+    @Test(arguments: NavigationStateHarness.all)
+    func navigationState_whenItemsAreNotCodable_shouldNotHaveCodable(_ harness: NavigationStateHarness) async throws {
         // Given
         struct Item: Hashable {
             let id: Int
         }
 
-        let navigationState = makeState()
+        let navigationState = harness.makeState()
 
         // When
         navigationState.setItems([Item(id: 1)])
 
         // Then
-        XCTAssertNil(navigationState.codable)
+        #expect(navigationState.codable == nil)
     }
 
     // MARK: - Restored items
 
-    func testNavigationState_whenRestored_shouldFindTheItems() async throws {
+    @Test(arguments: NavigationStateHarness.all)
+    func navigationState_whenRestored_shouldFindTheItems(_ harness: NavigationStateHarness) async throws {
         // Given
-        let navigationState = makeState()
+        let navigationState = harness.makeState()
 
         // When
-        apply(restoredFromAnotherLaunch, to: navigationState)
+        harness.apply(restoredFromAnotherLaunch, navigationState)
 
         // Then
-        XCTAssertEqual(navigationState.count, 2)
-        XCTAssertTrue(navigationState.contains(1))
-        XCTAssertTrue(navigationState.contains(2))
+        #expect(navigationState.count == 2)
+        #expect(navigationState.contains(1))
+        #expect(navigationState.contains(2))
     }
 
-    func testNavigationState_whenRestored_shouldRemoveAnItemKeepingTheOthers() async throws {
+    @Test(arguments: NavigationStateHarness.all)
+    func navigationState_whenRestored_shouldRemoveAnItemKeepingTheOthers(
+        _ harness: NavigationStateHarness
+    ) async throws {
         // Given
-        let navigationState = makeState()
-        apply(restoredFromAnotherLaunch, to: navigationState)
+        let navigationState = harness.makeState()
+        harness.apply(restoredFromAnotherLaunch, navigationState)
 
         // When
         navigationState.remove(1)
 
         // Then
-        XCTAssertEqual(navigationState.count, 1)
-        XCTAssertFalse(navigationState.contains(1))
-        XCTAssertTrue(navigationState.contains(2))
+        #expect(navigationState.count == 1)
+        #expect(!navigationState.contains(1))
+        #expect(navigationState.contains(2))
     }
 
-    func testNavigationState_whenRestored_shouldRemoveIncludingAnItem() async throws {
+    @Test(arguments: NavigationStateHarness.all)
+    func navigationState_whenRestored_shouldRemoveIncludingAnItem(_ harness: NavigationStateHarness) async throws {
         // Given
-        let navigationState = makeState()
-        apply(restoredFromAnotherLaunch, to: navigationState)
+        let navigationState = harness.makeState()
+        harness.apply(restoredFromAnotherLaunch, navigationState)
 
         // When
         navigationState.removeIncluding(2)
 
         // Then
-        XCTAssertEqual(navigationState.count, 1)
-        XCTAssertTrue(navigationState.contains(1))
+        #expect(navigationState.count == 1)
+        #expect(navigationState.contains(1))
     }
 
-    func testNavigationState_whenRestored_shouldRemoveUntilAnItem() async throws {
+    @Test(arguments: NavigationStateHarness.all)
+    func navigationState_whenRestored_shouldRemoveUntilAnItem(_ harness: NavigationStateHarness) async throws {
         // Given
-        let navigationState = makeState()
-        apply(restoredFromAnotherLaunch, to: navigationState)
+        let navigationState = harness.makeState()
+        harness.apply(restoredFromAnotherLaunch, navigationState)
 
         // When
         navigationState.removeUntil(1)
 
         // Then
-        XCTAssertEqual(navigationState.count, 1)
-        XCTAssertTrue(navigationState.contains(1))
-        XCTAssertFalse(navigationState.contains(2))
+        #expect(navigationState.count == 1)
+        #expect(navigationState.contains(1))
+        #expect(!navigationState.contains(2))
     }
 
-    func testNavigationState_whenRestored_shouldCodableHaveTheHashesOfThisLaunch() async throws {
+    @Test(arguments: NavigationStateHarness.all)
+    func navigationState_whenRestored_shouldCodableHaveTheHashesOfThisLaunch(
+        _ harness: NavigationStateHarness
+    ) async throws {
         // Given
-        let navigationState = makeState()
-        apply(restoredFromAnotherLaunch, to: navigationState)
+        let navigationState = harness.makeState()
+        harness.apply(restoredFromAnotherLaunch, navigationState)
 
         // Then
-        XCTAssertEqual(navigationState.codable?.hashes, [1.hashValue, 2.hashValue])
+        #expect(navigationState.codable?.hashes == [1.hashValue, 2.hashValue])
     }
 
-    func testNavigationState_whenStartedWithASequence_shouldRemoveAnItemKeepingTheOthers() async throws {
+    @Test(arguments: NavigationStateHarness.all)
+    func navigationState_whenStartedWithASequence_shouldRemoveAnItemKeepingTheOthers(
+        _ harness: NavigationStateHarness
+    ) async throws {
         // Given
-        let navigationState = makeState()
-        apply(PendingNavigationItems([1, 2, 3]), to: navigationState)
+        let navigationState = harness.makeState()
+        harness.apply(PendingNavigationItems([1, 2, 3]), navigationState)
 
         // When
         navigationState.remove(2)
 
         // Then
-        XCTAssertEqual(navigationState.count, 2)
-        XCTAssertTrue(navigationState.contains(1))
-        XCTAssertFalse(navigationState.contains(2))
-        XCTAssertTrue(navigationState.contains(3))
-    }
-}
-
-@available(iOS 16.0, tvOS 16.0, macOS 13.0, *)
-@MainActor
-class SystemNavigationStateTests: NavigationStateTests {
-
-    override func makeState() -> NavigationStateProtocol {
-        NavigationState()
-    }
-
-    override func apply(_ pendingItems: PendingNavigationItems, to state: NavigationStateProtocol) {
-        guard let state = state as? NavigationState else {
-            return XCTFail("Expected a NavigationState")
-        }
-
-        _ = state[pendingItems]
+        #expect(navigationState.count == 2)
+        #expect(navigationState.contains(1))
+        #expect(!navigationState.contains(2))
+        #expect(navigationState.contains(3))
     }
 }
 
 @MainActor
-class FallbackNavigationStateTests: NavigationStateTests {
-
-    override func makeState() -> NavigationStateProtocol {
-        FallbackNavigationState()
-    }
-
-    override func apply(_ pendingItems: PendingNavigationItems, to state: NavigationStateProtocol) {
-        guard let state = state as? FallbackNavigationState else {
-            return XCTFail("Expected a FallbackNavigationState")
-        }
-
-        state.update(pendingItems)
-    }
-}
-
-@MainActor
-class FallbackNavigationStatePresentationTests: XCTestCase {
+@Suite struct FallbackNavigationStatePresentationTests {
 
     /// What the state asks the navigation about.
     @MainActor
@@ -352,7 +378,7 @@ class FallbackNavigationStatePresentationTests: XCTestCase {
         await waitUntil { state.displayedCount == items.count }
     }
 
-    func testState_whenItemIsAppended_shouldBeDisplayedAtOnce() async throws {
+    @Test func state_whenItemIsAppended_shouldBeDisplayedAtOnce() async throws {
         // Given
         let state = FallbackNavigationState()
 
@@ -360,11 +386,11 @@ class FallbackNavigationStatePresentationTests: XCTestCase {
         state.append(1)
 
         // Then
-        XCTAssertEqual(state.count, 1)
-        XCTAssertEqual(state.displayedCount, 1)
+        #expect(state.count == 1)
+        #expect(state.displayedCount == 1)
     }
 
-    func testState_whenSeveralItemsAreSet_shouldDisplayThemOneAtATime() async throws {
+    @Test func state_whenSeveralItemsAreSet_shouldDisplayThemOneAtATime() async throws {
         // Given
         let state = FallbackNavigationState()
 
@@ -372,14 +398,14 @@ class FallbackNavigationStatePresentationTests: XCTestCase {
         state.setItems([1, 2, 3])
 
         // Then
-        XCTAssertEqual(state.count, 3)
-        XCTAssertEqual(state.displayedCount, 1)
+        #expect(state.count == 3)
+        #expect(state.displayedCount == 1)
 
         await show([1, 2, 3], in: state)
-        XCTAssertEqual(state.displayedCount, 3)
+        #expect(state.displayedCount == 3)
     }
 
-    func testState_whenItemIsAppendedDuringAPush_shouldWaitForItToAppear() async throws {
+    @Test func state_whenItemIsAppendedDuringAPush_shouldWaitForItToAppear() async throws {
         // Given
         let state = FallbackNavigationState()
         state.append(1)
@@ -388,17 +414,17 @@ class FallbackNavigationStatePresentationTests: XCTestCase {
         state.append(2)
 
         // Then
-        XCTAssertEqual(state.count, 2)
-        XCTAssertEqual(state.displayedCount, 1)
+        #expect(state.count == 2)
+        #expect(state.displayedCount == 1)
 
         state.didAppear(at: 0)
-        XCTAssertEqual(state.displayedCount, 1, "The push of the first item is still in progress")
+        #expect(state.displayedCount == 1, "The push of the first item is still in progress")
 
         await waitUntil { state.displayedCount == 2 }
-        XCTAssertEqual(state.displayedCount, 2)
+        #expect(state.displayedCount == 2)
     }
 
-    func testState_whenTheItemNeverAppears_shouldPushTheNextOneAnyway() async throws {
+    @Test func state_whenTheItemNeverAppears_shouldPushTheNextOneAnyway() async throws {
         // Given
         let state = FallbackNavigationState()
         state.append(1)
@@ -408,10 +434,10 @@ class FallbackNavigationStatePresentationTests: XCTestCase {
 
         // Then
         await waitUntil { state.displayedCount == 2 }
-        XCTAssertEqual(state.displayedCount, 2)
+        #expect(state.displayedCount == 2)
     }
 
-    func testState_whenItemsAreRemoved_shouldStopDisplayingThemAtOnce() async throws {
+    @Test func state_whenItemsAreRemoved_shouldStopDisplayingThemAtOnce() async throws {
         // Given
         let state = FallbackNavigationState()
         await show([1, 2, 3], in: state)
@@ -420,11 +446,11 @@ class FallbackNavigationStatePresentationTests: XCTestCase {
         state.removeLast()
 
         // Then
-        XCTAssertEqual(state.count, 2)
-        XCTAssertEqual(state.displayedCount, 2)
+        #expect(state.count == 2)
+        #expect(state.displayedCount == 2)
     }
 
-    func testState_whenTruncated_shouldKeepTheFirstItems() async throws {
+    @Test func state_whenTruncated_shouldKeepTheFirstItems() async throws {
         // Given
         let state = FallbackNavigationState()
         await show([1, 2, 3], in: state)
@@ -433,13 +459,13 @@ class FallbackNavigationStatePresentationTests: XCTestCase {
         state.truncate(to: 1)
 
         // Then
-        XCTAssertEqual(state.count, 1)
-        XCTAssertEqual(state.displayedCount, 1)
-        XCTAssertTrue(state.contains(1))
-        XCTAssertFalse(state.contains(2))
+        #expect(state.count == 1)
+        #expect(state.displayedCount == 1)
+        #expect(state.contains(1))
+        #expect(!state.contains(2))
     }
 
-    func testState_whenTheNavigationIsNotIdle_shouldWaitToPush() async throws {
+    @Test func state_whenTheNavigationIsNotIdle_shouldWaitToPush() async throws {
         // Given
         let state = FallbackNavigationState()
         let navigation = FakeNavigation()
@@ -449,15 +475,15 @@ class FallbackNavigationStatePresentationTests: XCTestCase {
         state.append(1)
 
         // Then
-        XCTAssertEqual(state.count, 1)
-        XCTAssertEqual(state.displayedCount, 0)
+        #expect(state.count == 1)
+        #expect(state.displayedCount == 0)
 
         navigation.isIdle = true
         await waitUntil { state.displayedCount == 1 }
-        XCTAssertEqual(state.displayedCount, 1)
+        #expect(state.displayedCount == 1)
     }
 
-    func testState_whenTheNavigationIsIdle_shouldPushOneItemAtATimeAsItLands() async throws {
+    @Test func state_whenTheNavigationIsIdle_shouldPushOneItemAtATimeAsItLands() async throws {
         // Given
         let state = FallbackNavigationState()
         let navigation = FakeNavigation()
@@ -466,15 +492,15 @@ class FallbackNavigationStatePresentationTests: XCTestCase {
 
         // When
         state.setItems([1, 2, 3])
-        XCTAssertEqual(state.displayedCount, 1)
+        #expect(state.displayedCount == 1)
 
         // Then
         navigation.landed = 1
         await waitUntil { state.displayedCount == 2 }
-        XCTAssertEqual(state.displayedCount, 2)
+        #expect(state.displayedCount == 2)
 
         navigation.landed = 2
         await waitUntil { state.displayedCount == 3 }
-        XCTAssertEqual(state.displayedCount, 3)
+        #expect(state.displayedCount == 3)
     }
 }

@@ -1,36 +1,26 @@
 // Copyright 2026 Brenno Giovanini de Moura
 // SPDX-License-Identifier: MIT
 
-import XCTest
+import Foundation
+import Testing
 
 @testable import NavigationKit
 
 @MainActor
-class NavigationActionTests: XCTestCase {
+@Suite struct NavigationActionTests {
 
-    var state: NavigationStateMock!
+    let state = NavigationStateMock()
 
-    override func setUp() async throws {
-        try await super.setUp()
-        state = NavigationStateMock()
-    }
-
-    override func tearDown() async throws {
-        try await super.tearDown()
-        state = nil
-    }
-
-    func testNavigationAction_whenEmpty_shouldBeEmpty() async throws {
+    @Test func navigationAction_whenEmpty_shouldBeEmpty() async throws {
         // Given
         let navigationAction = NavigationAction(state)
 
         // Then
-        XCTAssertNotNil(state)
-        XCTAssertTrue(state.stack.isEmpty)
-        XCTAssertEqual(navigationAction.count, .zero)
+        #expect(state.stack.isEmpty)
+        #expect(navigationAction.count == .zero)
     }
 
-    func testNavigationAction_whenAppendItems_shouldContainsItems() async throws {
+    @Test func navigationAction_whenAppendItems_shouldContainsItems() async throws {
         // Given
         let navigationAction = NavigationAction(state)
         let items = [1, 2, 3]
@@ -41,11 +31,11 @@ class NavigationActionTests: XCTestCase {
         }
 
         // Then
-        XCTAssertEqual(navigationAction.count, items.count)
-        XCTAssertEqual(state.stack, items)
+        #expect(navigationAction.count == items.count)
+        #expect(state.stack == items.map(AnyHashable.init))
     }
 
-    func testNavigationAction_whenAppendItems_shouldRemoveItem() async throws {
+    @Test func navigationAction_whenAppendItems_shouldRemoveItem() async throws {
         // Given
         let navigationAction = NavigationAction(state)
         let item = 1
@@ -59,11 +49,11 @@ class NavigationActionTests: XCTestCase {
         navigationAction.remove(item)
 
         // Then
-        XCTAssertEqual(navigationAction.count, items.count - 1)
-        XCTAssertEqual(state.stack, items.filter { $0 != item })
+        #expect(navigationAction.count == items.count - 1)
+        #expect(state.stack == items.filter { $0 != item }.map(AnyHashable.init))
     }
 
-    func testNavigationAction_whenAppendItems_shouldRemoveUntilItem() async throws {
+    @Test func navigationAction_whenAppendItems_shouldRemoveUntilItem() async throws {
         // Given
         let navigationAction = NavigationAction(state)
         let item = 2
@@ -79,12 +69,12 @@ class NavigationActionTests: XCTestCase {
         // Then
         let index: Int! = items.firstIndex(of: item)
 
-        XCTAssertNotNil(index)
-        XCTAssertEqual(navigationAction.count, index + 1)
-        XCTAssertEqual(state.stack, Array(items[0...index]))
+        #expect(index != nil)
+        #expect(navigationAction.count == index + 1)
+        #expect(state.stack == Array(items[0...index]).map(AnyHashable.init))
     }
 
-    func testNavigationAction_whenAppendItems_shouldRemoveIncludingItem() async throws {
+    @Test func navigationAction_whenAppendItems_shouldRemoveIncludingItem() async throws {
         // Given
         let navigationAction = NavigationAction(state)
         let item = 2
@@ -100,12 +90,12 @@ class NavigationActionTests: XCTestCase {
         // Then
         let index: Int! = items.firstIndex(of: item)
 
-        XCTAssertNotNil(index)
-        XCTAssertEqual(navigationAction.count, index)
-        XCTAssertEqual(state.stack, Array(items[0..<index]))
+        #expect(index != nil)
+        #expect(navigationAction.count == index)
+        #expect(state.stack == Array(items[0..<index]).map(AnyHashable.init))
     }
 
-    func testNavigationAction_whenSetItems_shouldBeEqual() async throws {
+    @Test func navigationAction_whenSetItems_shouldBeEqual() async throws {
         // Given
         let navigationAction = NavigationAction(state)
         let items = [1, 2, 3, 4]
@@ -114,11 +104,11 @@ class NavigationActionTests: XCTestCase {
         navigationAction.setItems(items)
 
         // Then
-        XCTAssertEqual(navigationAction.count, items.count)
-        XCTAssertEqual(state.stack, items)
+        #expect(navigationAction.count == items.count)
+        #expect(state.stack == items.map(AnyHashable.init))
     }
 
-    func testNavigationAction_whenSetItems_shouldRemoveAll() async throws {
+    @Test func navigationAction_whenSetItems_shouldRemoveAll() async throws {
         // Given
         let navigationAction = NavigationAction(state)
         let items = [1, 2, 3, 4]
@@ -128,11 +118,11 @@ class NavigationActionTests: XCTestCase {
         navigationAction.removeAll()
 
         // Then
-        XCTAssertEqual(navigationAction.count, .zero)
-        XCTAssertTrue(state.stack.isEmpty)
+        #expect(navigationAction.count == .zero)
+        #expect(state.stack.isEmpty)
     }
 
-    func testNavigationAction_whenRemoveLastItem_shouldBeOneItemLeft() async throws {
+    @Test func navigationAction_whenRemoveLastItem_shouldBeOneItemLeft() async throws {
         // Given
         let navigationAction = NavigationAction(state)
         let items = [1, 2, 3, 4]
@@ -145,11 +135,11 @@ class NavigationActionTests: XCTestCase {
         navigationAction.removeLast()
 
         // Then
-        XCTAssertEqual(navigationAction.count, items.count - 1)
-        XCTAssertEqual(state.stack, Array(items[0..<items.count - 1]))
+        #expect(navigationAction.count == items.count - 1)
+        #expect(state.stack == Array(items[0..<items.count - 1]).map(AnyHashable.init))
     }
 
-    func testNavigationAction_whenRemoveLastTwoItems_shouldBeTwoItemLeft() async throws {
+    @Test func navigationAction_whenRemoveLastTwoItems_shouldBeTwoItemLeft() async throws {
         // Given
         let navigationAction = NavigationAction(state)
         let items = [1, 2, 3, 4]
@@ -162,11 +152,11 @@ class NavigationActionTests: XCTestCase {
         navigationAction.removeLast(2)
 
         // Then
-        XCTAssertEqual(navigationAction.count, items.count - 2)
-        XCTAssertEqual(state.stack, Array(items[0..<items.count - 2]))
+        #expect(navigationAction.count == items.count - 2)
+        #expect(state.stack == Array(items[0..<items.count - 2]).map(AnyHashable.init))
     }
 
-    func testNavigationAction_whenSetItems_shouldCodableBeEqual() async throws {
+    @Test func navigationAction_whenSetItems_shouldCodableBeEqual() async throws {
         // Given
         let navigationAction = NavigationAction(state)
         let items = [1, 2, 3, 4]
@@ -178,13 +168,12 @@ class NavigationActionTests: XCTestCase {
         navigationAction.setItems(items)
 
         // Then
-        XCTAssertEqual(
-            try navigationAction.codable.map { try encoder.encode($0) },
-            try state.codable.map { try encoder.encode($0) }
-        )
+        let encoded = try navigationAction.codable.map { try encoder.encode($0) }
+        let expected = try state.codable.map { try encoder.encode($0) }
+        #expect(encoded == expected)
     }
 
-    func testNavigationAction_whenTwoItems_shouldContainsOne() async throws {
+    @Test func navigationAction_whenTwoItems_shouldContainsOne() async throws {
         // Given
         let navigationAction = NavigationAction(state)
         let value = 1
@@ -194,10 +183,10 @@ class NavigationActionTests: XCTestCase {
         navigationAction.setItems(items)
 
         // Then
-        XCTAssertTrue(navigationAction.contains(value))
+        #expect(navigationAction.contains(value))
     }
 
-    func testNavigationAction_whenTwoItems_shouldNotContainsOne() async throws {
+    @Test func navigationAction_whenTwoItems_shouldNotContainsOne() async throws {
         // Given
         let navigationAction = NavigationAction(state)
         let value = 0
@@ -207,6 +196,6 @@ class NavigationActionTests: XCTestCase {
         navigationAction.setItems(items)
 
         // Then
-        XCTAssertFalse(navigationAction.contains(value))
+        #expect(!navigationAction.contains(value))
     }
 }

@@ -1,26 +1,16 @@
 // Copyright 2026 Brenno Giovanini de Moura
 // SPDX-License-Identifier: MIT
 
-import XCTest
+import Testing
 
 @testable import NavigationKit
 
 @MainActor
-class SceneActionTransformerTests: XCTestCase {
+@Suite struct SceneActionTransformerTests {
 
-    var sceneAction: SceneAction!
+    let sceneAction = SceneAction()
 
-    override func setUp() async throws {
-        try await super.setUp()
-        sceneAction = .init()
-    }
-
-    override func tearDown() async throws {
-        try await super.tearDown()
-        sceneAction = nil
-    }
-
-    func testTransformer_whenString_shouldBeString() async throws {
+    @Test func transformer_whenString_shouldBeString() async throws {
         // Given
         let input = "Hello World"
         let sut = SceneActionTransformer()
@@ -33,6 +23,6 @@ class SceneActionTransformerTests: XCTestCase {
 
         // Then
         let output = await iterator.next()
-        XCTAssertEqual(output, input)
+        #expect(output == input)
     }
 }

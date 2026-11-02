@@ -1,30 +1,30 @@
 // Copyright 2026 Brenno Giovanini de Moura
 // SPDX-License-Identifier: MIT
 
-import XCTest
+import Testing
 
 @testable import NavigationKit
 
-class SeedTests: XCTestCase {
+@Suite struct SeedTests {
 
-    func testSeed_whenSelfSeed_shouldBeEqual() async throws {
+    @Test func seed_whenSelfSeed_shouldBeEqual() async throws {
         // Given
         let seed = Seed()
 
         // Then
-        XCTAssertEqual(seed, seed)
+        #expect(seed == seed)
     }
 
-    func testSeed_whenTwoSeeds_shouldBeNotEqual() async throws {
+    @Test func seed_whenTwoSeeds_shouldBeNotEqual() async throws {
         // Given
         let seed1 = Seed()
         let seed2 = Seed()
 
         // Then
-        XCTAssertNotEqual(seed1, seed2)
+        #expect(seed1 != seed2)
     }
 
-    func testSeed_whenSelfSeed_shouldHashBeObjectIdentifier() async throws {
+    @Test func seed_whenSelfSeed_shouldHashBeObjectIdentifier() async throws {
         // Given
         let seed = Seed()
 
@@ -32,6 +32,6 @@ class SeedTests: XCTestCase {
         let hashValue = ObjectIdentifier(seed).hashValue
 
         // Then
-        XCTAssertEqual(seed.hashValue, hashValue)
+        #expect(seed.hashValue == hashValue)
     }
 }
