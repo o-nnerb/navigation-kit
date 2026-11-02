@@ -1,6 +1,5 @@
-/*
- See LICENSE for this package's licensing information.
-*/
+// Copyright 2026 Brenno Giovanini de Moura
+// SPDX-License-Identifier: MIT
 
 import SwiftUI
 
@@ -18,19 +17,21 @@ private struct SceneActionFullScreenCover<Action: Hashable, Scene: Hashable>: Vi
 
     func body(content: Content) -> some View {
         content
-            .modifier(FullScreenCoverModifier(
-                presented: $presented,
-                reducer: reducer
-            ))
+            .modifier(
+                FullScreenCoverModifier(
+                    presented: $presented,
+                    reducer: reducer
+                )
+            )
             .sceneAction(for: Action.self) {
                 presented = .init(item: $0)
             }
     }
 }
 
-private extension SceneActionFullScreenCover {
+extension SceneActionFullScreenCover {
 
-    struct FullScreenCoverModifier: ViewModifier {
+    fileprivate struct FullScreenCoverModifier: ViewModifier {
 
         @Environment(\.sceneAction) var sceneAction
         @Environment(\.viewResolver) var viewResolver
@@ -52,13 +53,11 @@ private extension SceneActionFullScreenCover {
 @MainActor
 extension View {
 
-    /**
-     Presents a full-screen cover when an action of the specified type is received.
-     - Parameters:
-        - actionType: The type of action to listen for.
-        - reducer: The reducer function that will be used to update the scene's state based on the action received.
-     - Returns: A view that will present a full-screen cover when the specified action is received.
-     */
+    /// Presents a full-screen cover when an action of the specified type is received.
+    /// - Parameters:
+    ///    - actionType: The type of action to listen for.
+    ///    - reducer: The reducer function that will be used to update the scene's state based on the action received.
+    /// - Returns: A view that will present a full-screen cover when the specified action is received.
     public func sceneActionFullScreenCover<Action: Hashable, Scene: Hashable>(
         for actionType: Action.Type,
         reducer: @escaping (Action) -> Scene
@@ -66,11 +65,9 @@ extension View {
         modifier(SceneActionFullScreenCover(reducer: reducer))
     }
 
-    /**
-     Presents a full-screen cover when an action of the specified type is received.
-     - Parameter actionType: The type of action to listen for.
-     - Returns: A view that will present a full-screen cover when the specified action is received.
-     */
+    /// Presents a full-screen cover when an action of the specified type is received.
+    /// - Parameter actionType: The type of action to listen for.
+    /// - Returns: A view that will present a full-screen cover when the specified action is received.
     public func sceneActionFullScreenCover<Action: Hashable>(
         for actionType: Action.Type
     ) -> some View {

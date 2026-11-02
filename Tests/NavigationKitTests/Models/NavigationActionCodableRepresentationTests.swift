@@ -1,9 +1,9 @@
-/*
- See LICENSE for this package's licensing information.
-*/
+// Copyright 2026 Brenno Giovanini de Moura
+// SPDX-License-Identifier: MIT
 
-import XCTest
 import SwiftUI
+import XCTest
+
 @testable import NavigationKit
 
 // swiftlint:disable type_name
@@ -55,10 +55,13 @@ class NavigationActionCodableRepresentationTests: XCTestCase {
         XCTAssertNotNil(sut)
         XCTAssertEqual(sut?.hashes, hashes)
 
-        XCTAssertEqual(sut?.navigationPath, try {
-            try path.codable
-                .map { try encoder.encode($0) }
-                .map { try decoder.decode(NavigationPath.CodableRepresentation.self, from: $0) }
-        }())
+        XCTAssertEqual(
+            sut?.navigationPath,
+            try {
+                try path.codable
+                    .map { try encoder.encode($0) }
+                    .map { try decoder.decode(NavigationPath.CodableRepresentation.self, from: $0) }
+            }()
+        )
     }
 }

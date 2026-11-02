@@ -1,9 +1,8 @@
-/*
- See LICENSE for this package's licensing information.
-*/
+// Copyright 2026 Brenno Giovanini de Moura
+// SPDX-License-Identifier: MIT
 
-import SwiftUI
 import Combine
+import SwiftUI
 
 /// A type that transforms a scene action to a specific item.
 public struct SceneActionTransformer {
@@ -50,8 +49,11 @@ extension SceneActionTransformer {
 extension SceneActionTransformer.State {
 
     func send<Item: Hashable>(_ item: Item) {
-        transaction(item, execute: {
-            $0($1)
-        })
+        transaction(
+            item,
+            execute: {
+                $0($1)
+            }
+        )
     }
 }

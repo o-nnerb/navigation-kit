@@ -1,27 +1,24 @@
-/*
- See LICENSE for this package's licensing information.
-*/
+// Copyright 2026 Brenno Giovanini de Moura
+// SPDX-License-Identifier: MIT
 
-import SwiftUI
 import Combine
+import SwiftUI
 
-/**
- A type representing an action that modifies the navigation stack.
-
- You can use this type to add, remove, or manipulate items in the navigation stack of a view.
-
- ```swift
- struct MainView: View {
-     @Environment(\.navigationAction) var navigationAction
-
-     var body: some View {
-         Button("Submit") {
-             navigationAction.append(UserModel())
-         }
-     }
- }
- ```
- */
+/// A type representing an action that modifies the navigation stack.
+///
+/// You can use this type to add, remove, or manipulate items in the navigation stack of a view.
+///
+/// ```swift
+/// struct MainView: View {
+///     @Environment(\.navigationAction) var navigationAction
+///
+///     var body: some View {
+///         Button("Submit") {
+///             navigationAction.append(UserModel())
+///         }
+///     }
+/// }
+/// ```
 @MainActor
 public struct NavigationAction {
 
@@ -43,11 +40,9 @@ public struct NavigationAction {
 
 extension NavigationAction {
 
-    /**
-     Sets the items in the navigation stack to the specified array of items.
-
-     - Parameter items: The items to set in the navigation stack.
-     */
+    /// Sets the items in the navigation stack to the specified array of items.
+    ///
+    /// - Parameter items: The items to set in the navigation stack.
     public func setItems<Item: Hashable & Sendable>(_ items: [Item]) {
         if performIfNeeded(for: .setItems(items)) != nil {
             return
@@ -56,11 +51,9 @@ extension NavigationAction {
         state.setItems(items)
     }
 
-    /**
-     Sets the items in the navigation stack to the specified array of `Codable` items.
-
-     - Parameter items: The items to set in the navigation stack.
-     */
+    /// Sets the items in the navigation stack to the specified array of `Codable` items.
+    ///
+    /// - Parameter items: The items to set in the navigation stack.
     public func setItems<Item: Hashable & Codable & Sendable>(_ items: [Item]) {
         if performIfNeeded(for: .setItems(items)) != nil {
             return
@@ -69,11 +62,9 @@ extension NavigationAction {
         state.setItems(items)
     }
 
-    /**
-     Appends the specified item to the end of the navigation stack.
-
-     - Parameter item: The item to append.
-     */
+    /// Appends the specified item to the end of the navigation stack.
+    ///
+    /// - Parameter item: The item to append.
     public func append<Item: Hashable & Sendable>(_ item: Item) {
         if performIfNeeded(for: .append(item)) != nil {
             return
@@ -82,11 +73,9 @@ extension NavigationAction {
         state.append(item)
     }
 
-    /**
-     Appends the specified `Codable` item to the end of the navigation stack.
-
-     - Parameter item: The item to append.
-     */
+    /// Appends the specified `Codable` item to the end of the navigation stack.
+    ///
+    /// - Parameter item: The item to append.
     public func append<Item: Hashable & Codable & Sendable>(_ item: Item) {
         if performIfNeeded(for: .append(item)) != nil {
             return
@@ -95,11 +84,9 @@ extension NavigationAction {
         state.append(item)
     }
 
-    /**
-     Removes all instances of the specified item and all items after it from the navigation stack.
-
-     - Parameter item: The item to remove.
-     */
+    /// Removes all instances of the specified item and all items after it from the navigation stack.
+    ///
+    /// - Parameter item: The item to remove.
     public func removeIncluding<Item: Hashable & Sendable>(_ item: Item) {
         if performIfNeeded(for: .removeIncluding(item)) != nil {
             return
@@ -108,11 +95,9 @@ extension NavigationAction {
         state.removeIncluding(item)
     }
 
-    /**
-     Removes all items in the navigation stack before the specified item.
-
-     - Parameter item: The item to remove until.
-     */
+    /// Removes all items in the navigation stack before the specified item.
+    ///
+    /// - Parameter item: The item to remove until.
     public func removeUntil<Item: Hashable & Sendable>(_ item: Item) {
         if performIfNeeded(for: .removeUntil(item)) != nil {
             return
@@ -121,11 +106,9 @@ extension NavigationAction {
         state.removeUntil(item)
     }
 
-    /**
-     Removes a specific item in the navigation stack.
-
-     - Parameter item: The item to remove.
-     */
+    /// Removes a specific item in the navigation stack.
+    ///
+    /// - Parameter item: The item to remove.
     public func remove<Item: Hashable & Sendable>(_ item: Item) {
         if performIfNeeded(for: .remove(item)) != nil {
             return
@@ -134,32 +117,24 @@ extension NavigationAction {
         state.remove(item)
     }
 
-    /**
-     Removes all items from the navigation stack.
-     */
+    /// Removes all items from the navigation stack.
     public func removeAll() {
         state.removeAll()
     }
 
-    /**
-     Removes the last item from the navigation stack.
-     */
+    /// Removes the last item from the navigation stack.
     public func removeLast() {
         state.removeLast()
     }
 
-    /**
-     Removes the last k items from the navigation stack.
-
-     - Parameter k: The number of items to remove.
-     */
+    /// Removes the last k items from the navigation stack.
+    ///
+    /// - Parameter k: The number of items to remove.
     public func removeLast(_ k: Int) {
         state.removeLast(k)
     }
 
-    /**
-     The number of items in the navigation stack.
-     */
+    /// The number of items in the navigation stack.
     public var count: Int {
         state.count
     }

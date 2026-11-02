@@ -1,9 +1,8 @@
-/*
- See LICENSE for this package's licensing information.
-*/
+// Copyright 2026 Brenno Giovanini de Moura
+// SPDX-License-Identifier: MIT
 
-import Foundation
 import Combine
+import Foundation
 
 /// A type representing a scene transaction that can be observed by a view
 /// and trigger a destination action.

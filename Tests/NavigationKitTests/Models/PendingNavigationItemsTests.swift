@@ -1,9 +1,9 @@
-/*
- See LICENSE for this package's licensing information.
-*/
+// Copyright 2026 Brenno Giovanini de Moura
+// SPDX-License-Identifier: MIT
 
-import XCTest
 import SwiftUI
+import XCTest
+
 @testable import NavigationKit
 
 class PendingNavigationItemsTests: XCTestCase {

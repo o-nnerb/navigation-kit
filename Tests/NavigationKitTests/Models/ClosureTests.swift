@@ -1,8 +1,8 @@
-/*
- See LICENSE for this package's licensing information.
-*/
+// Copyright 2026 Brenno Giovanini de Moura
+// SPDX-License-Identifier: MIT
 
 import XCTest
+
 @testable import NavigationKit
 
 class ClosureTests: XCTestCase {
@@ -54,7 +54,7 @@ class ClosureTests: XCTestCase {
     func testClosure_whenParameterIsVoid_shouldReturnBool() {
         // Given
         let closure = Closure<Void, Bool>.closure {
-            return true
+            true
         }
 
         // When

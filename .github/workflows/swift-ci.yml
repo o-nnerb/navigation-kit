@@ -1,0 +1,64 @@
+name: swift-ci
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'Package.swift'
+      - 'Sources/**'
+      - 'Tests/**'
+      - '.swift-format'
+      - '.github/workflows/swift-ci.yml'
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [main]
+    paths:
+      - 'Package.swift'
+      - 'Sources/**'
+      - 'Tests/**'
+      - '.swift-format'
+      - '.github/workflows/swift-ci.yml'
+  workflow_dispatch: {}
+
+# Cancel any in-progress or queued run for the same ref when a new run is
+# triggered. Pushes to main use github.run_id so each run gets its own group
+# instead of sharing one by ref.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: "Swift CI"
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
+    uses: request-dl/.github/.github/workflows/swift-ci.yaml@main
+    with:
+      name: NavigationKit
+      product-name: NavigationKit
+      swift-version: '6.4'
+      platform: xcode-27
+
+      # Step 1 – Header Validation
+      enable-header-validation: true
+      header-template: |
+        // Copyright 2026 Brenno Giovanini de Moura
+        // SPDX-License-Identifier: MIT
+
+      # Step 2 – Format
+      enable-format: true
+      format-swift-version: '6.4'
+
+      # Step 4 – Apple (NavigationKit declares iOS, tvOS, macOS and watchOS only)
+      enable-apple-tests: true
+      package-name: "NavigationKit"
+      xcode-version: '27.1'
+      apple-coverage-enabled: true
+      apple-tests-matrix: >-
+        [{"destination":"platform=iOS Simulator,arch=arm64,name=iPhone 18 Pro,OS=27.0","name":"iOS"},
+        {"destination":"platform=watchOS Simulator,arch=arm64,name=Apple Watch Series 12 (42mm),OS=27.0","name":"watchOS"},
+        {"destination":"platform=tvOS Simulator,arch=arm64,name=Apple TV 4K (3rd generation) (at 1080p),OS=27.0","name":"tvOS"},
+        {"destination":"platform=macOS,arch=arm64,name=My Mac","name":"macOS"}]
+
+      # Step 5
+      enable-coverage-upload: true
+    secrets: inherit

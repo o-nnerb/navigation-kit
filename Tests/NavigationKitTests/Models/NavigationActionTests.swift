@@ -1,8 +1,8 @@
-/*
- See LICENSE for this package's licensing information.
-*/
+// Copyright 2026 Brenno Giovanini de Moura
+// SPDX-License-Identifier: MIT
 
 import XCTest
+
 @testable import NavigationKit
 
 @MainActor
@@ -81,7 +81,7 @@ class NavigationActionTests: XCTestCase {
 
         XCTAssertNotNil(index)
         XCTAssertEqual(navigationAction.count, index + 1)
-        XCTAssertEqual(state.stack, Array(items[0 ... index]))
+        XCTAssertEqual(state.stack, Array(items[0...index]))
     }
 
     func testNavigationAction_whenAppendItems_shouldRemoveIncludingItem() async throws {
@@ -102,7 +102,7 @@ class NavigationActionTests: XCTestCase {
 
         XCTAssertNotNil(index)
         XCTAssertEqual(navigationAction.count, index)
-        XCTAssertEqual(state.stack, Array(items[0 ..< index]))
+        XCTAssertEqual(state.stack, Array(items[0..<index]))
     }
 
     func testNavigationAction_whenSetItems_shouldBeEqual() async throws {
@@ -146,7 +146,7 @@ class NavigationActionTests: XCTestCase {
 
         // Then
         XCTAssertEqual(navigationAction.count, items.count - 1)
-        XCTAssertEqual(state.stack, Array(items[0 ..< items.count - 1]))
+        XCTAssertEqual(state.stack, Array(items[0..<items.count - 1]))
     }
 
     func testNavigationAction_whenRemoveLastTwoItems_shouldBeTwoItemLeft() async throws {
@@ -163,7 +163,7 @@ class NavigationActionTests: XCTestCase {
 
         // Then
         XCTAssertEqual(navigationAction.count, items.count - 2)
-        XCTAssertEqual(state.stack, Array(items[0 ..< items.count - 2]))
+        XCTAssertEqual(state.stack, Array(items[0..<items.count - 2]))
     }
 
     func testNavigationAction_whenSetItems_shouldCodableBeEqual() async throws {
@@ -172,6 +172,7 @@ class NavigationActionTests: XCTestCase {
         let items = [1, 2, 3, 4]
 
         let encoder = JSONEncoder()
+        encoder.outputFormatting = .sortedKeys
 
         // When
         navigationAction.setItems(items)

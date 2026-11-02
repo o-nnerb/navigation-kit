@@ -1,9 +1,9 @@
-/*
- See LICENSE for this package's licensing information.
-*/
+// Copyright 2026 Brenno Giovanini de Moura
+// SPDX-License-Identifier: MIT
 
-import XCTest
 import SwiftUI
+import XCTest
+
 @testable import NavigationKit
 
 @MainActor
@@ -151,6 +151,7 @@ class NavigationStateTests: XCTestCase {
         let items = [1, 2, 3, 4]
 
         let encoder = JSONEncoder()
+        encoder.outputFormatting = .sortedKeys
 
         // When
         navigationState.setItems(items)
@@ -159,10 +160,12 @@ class NavigationStateTests: XCTestCase {
         XCTAssertEqual(
             try navigationState.codable.map { try encoder.encode($0) },
             try NavigationPath(items).codable.map {
-                try encoder.encode(NavigationAction.CodableRepresentation(
-                    navigationPath: $0,
-                    hashes: items.map(\.hashValue)
-                ))
+                try encoder.encode(
+                    NavigationAction.CodableRepresentation(
+                        navigationPath: $0,
+                        hashes: items.map(\.hashValue)
+                    )
+                )
             }
         )
     }

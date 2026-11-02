@@ -1,8 +1,8 @@
-/*
- See LICENSE for this package's licensing information.
-*/
+// Copyright 2026 Brenno Giovanini de Moura
+// SPDX-License-Identifier: MIT
 
 import XCTest
+
 @testable import NavigationKit
 
 @MainActor
@@ -81,7 +81,7 @@ class NavigationDestinationTransformerTests: XCTestCase {
         sut.perform(navigationAction)
 
         // Then
-        XCTAssertEqual(navigationState.stack, Array(items[0 ... (items.firstIndex(of: value) ?? .zero)]))
+        XCTAssertEqual(navigationState.stack, Array(items[0...(items.firstIndex(of: value) ?? .zero)]))
     }
 
     func testTransformer_whenRemoveIncludingActionCodable_shouldBeValid() async throws {
@@ -96,13 +96,13 @@ class NavigationDestinationTransformerTests: XCTestCase {
         sut.perform(navigationAction)
 
         // Then
-        XCTAssertEqual(navigationState.stack, Array(items[0 ..< (items.firstIndex(of: value) ?? .zero)]))
+        XCTAssertEqual(navigationState.stack, Array(items[0..<(items.firstIndex(of: value) ?? .zero)]))
     }
 
     func testTransformer_whenContainsCodable_shouldBeTrue() async throws {
         // Given
         let value = 2
-        let items = Array(1 ... 3)
+        let items = Array(1...3)
         let sut = NavigationDestinationTransformer(.contains)
 
         // When
@@ -117,7 +117,7 @@ class NavigationDestinationTransformerTests: XCTestCase {
     func testTransformer_whenContainsCodable_shouldBeFalse() async throws {
         // Given
         let value = 0
-        let items = Array(1 ... 3)
+        let items = Array(1...3)
         let sut = NavigationDestinationTransformer(.contains)
 
         // When
@@ -182,7 +182,7 @@ class NavigationDestinationTransformerTests: XCTestCase {
         sut.perform(navigationAction)
 
         // Then
-        XCTAssertEqual(navigationState.stack, Array(items[0 ... (items.firstIndex(of: value) ?? .zero)]))
+        XCTAssertEqual(navigationState.stack, Array(items[0...(items.firstIndex(of: value) ?? .zero)]))
     }
 
     func testTransformer_whenRemoveIncludingAction_shouldBeValid() async throws {
@@ -197,13 +197,13 @@ class NavigationDestinationTransformerTests: XCTestCase {
         sut.perform(navigationAction)
 
         // Then
-        XCTAssertEqual(navigationState.stack, Array(items[0 ..< (items.firstIndex(of: value) ?? .zero)]))
+        XCTAssertEqual(navigationState.stack, Array(items[0..<(items.firstIndex(of: value) ?? .zero)]))
     }
 
     func testTransformer_whenContains_shouldBeTrue() async throws {
         // Given
         let value = NotCodable(value: 2)
-        let items = (1 ... 3).map {
+        let items = (1...3).map {
             NotCodable(value: $0)
         }
         let sut = NavigationDestinationTransformer(.contains)
@@ -220,7 +220,7 @@ class NavigationDestinationTransformerTests: XCTestCase {
     func testTransformer_whenContains_shouldBeFalse() async throws {
         // Given
         let value = NotCodable(value: 0)
-        let items = (1 ... 3).map {
+        let items = (1...3).map {
             NotCodable(value: $0)
         }
         let sut = NavigationDestinationTransformer(.contains)

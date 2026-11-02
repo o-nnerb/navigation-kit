@@ -1,6 +1,5 @@
-/*
- See LICENSE for this package's licensing information.
-*/
+// Copyright 2026 Brenno Giovanini de Moura
+// SPDX-License-Identifier: MIT
 
 import SwiftUI
 
@@ -75,11 +74,13 @@ extension View {
         key: Key,
         value: Value
     ) -> some View {
-        modifier(ResolverModifier(
-            keyPath: keyPath,
-            init: initClosure,
-            key: key,
-            value: value
-        ))
+        modifier(
+            ResolverModifier(
+                keyPath: keyPath,
+                init: initClosure,
+                key: key,
+                value: value
+            )
+        )
     }
 }

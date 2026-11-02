@@ -1,6 +1,9 @@
 excluded:
     .build
 
+disabled_rules:
+    - trailing_comma
+
 opt_in_rules:
     - force_unwrapping
     - opening_brace

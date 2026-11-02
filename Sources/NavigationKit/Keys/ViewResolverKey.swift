@@ -1,6 +1,5 @@
-/*
- See LICENSE for this package's licensing information.
-*/
+// Copyright 2026 Brenno Giovanini de Moura
+// SPDX-License-Identifier: MIT
 
 import SwiftUI
 
@@ -32,18 +31,16 @@ extension EnvironmentValues {
 
 extension View {
 
-    /**
-     Associates a view with a specific type of item.
-
-     Use this method to associate a view with a specific type of item. When the view
-     resolver encounters an item of the specified type, it calls the provided closure to
-     create a view for the item.
-
-     - Parameters:
-        - type: The type of item to associate with the view.
-        - content: The closure that creates a view for the item.
-     - Returns: A modified view with a view resolver configured to handle the specified item.
-     */
+    /// Associates a view with a specific type of item.
+    ///
+    /// Use this method to associate a view with a specific type of item. When the view
+    /// resolver encounters an item of the specified type, it calls the provided closure to
+    /// create a view for the item.
+    ///
+    /// - Parameters:
+    ///    - type: The type of item to associate with the view.
+    ///    - content: The closure that creates a view for the item.
+    /// - Returns: A modified view with a view resolver configured to handle the specified item.
     public func viewResolver<Item: Hashable & Sendable, Content: View>(
         for type: Item.Type,
         @ViewBuilder _ content: @escaping @MainActor (Item) -> Content

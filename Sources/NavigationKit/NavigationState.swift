@@ -1,9 +1,8 @@
-/*
- See LICENSE for this package's licensing information.
-*/
+// Copyright 2026 Brenno Giovanini de Moura
+// SPDX-License-Identifier: MIT
 
-import SwiftUI
 import Combine
+import SwiftUI
 
 @MainActor
 final class NavigationState: ObservableObject {
@@ -53,7 +52,7 @@ final class NavigationState: ObservableObject {
     }
 
     private func updateHashes() {
-        hashes = Array(hashes[0 ..< path.count])
+        hashes = Array(hashes[0..<path.count])
     }
 }
 
@@ -106,7 +105,7 @@ extension NavigationState: NavigationStateProtocol {
             return
         }
 
-        for hash in hashes[index ..< hashes.endIndex] {
+        for hash in hashes[index..<hashes.endIndex] {
             restore[hash] = nil
         }
 
@@ -120,7 +119,7 @@ extension NavigationState: NavigationStateProtocol {
             return
         }
 
-        for hash in hashes[index + 1 ..< hashes.endIndex] {
+        for hash in hashes[index + 1..<hashes.endIndex] {
             restore[hash] = nil
         }
 
@@ -166,7 +165,7 @@ extension NavigationState: NavigationStateProtocol {
 
     func removeLast(_ k: Int) {
         let index = hashes.index(hashes.endIndex, offsetBy: -k)
-        for hash in hashes[index ..< hashes.endIndex] {
+        for hash in hashes[index..<hashes.endIndex] {
             restore[hash] = nil
         }
 

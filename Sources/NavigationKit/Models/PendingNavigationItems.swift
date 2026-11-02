@@ -1,9 +1,8 @@
-/*
- See LICENSE for this package's licensing information.
-*/
+// Copyright 2026 Brenno Giovanini de Moura
+// SPDX-License-Identifier: MIT
 
-import SwiftUI
 import Combine
+import SwiftUI
 
 struct PendingNavigationItems: Hashable {
     let path: NavigationPath
