@@ -221,6 +221,18 @@ class FallbackNavigationStateTests: NavigationStateTests {
 @MainActor
 class FallbackNavigationStatePresentationTests: XCTestCase {
 
+    /// Sets the items and lets each one appear, like the views of the stack do.
+    private func show(_ items: [Int], in state: FallbackNavigationState) async {
+        state.setItems(items)
+
+        for level in 0..<items.count {
+            await waitUntil { state.displayedCount > level }
+            state.didAppear(at: level)
+        }
+
+        await waitUntil { state.displayedCount == items.count }
+    }
+
     func testState_whenItemIsAppended_shouldBeDisplayedAtOnce() async throws {
         // Given
         let state = FallbackNavigationState()
@@ -244,11 +256,11 @@ class FallbackNavigationStatePresentationTests: XCTestCase {
         XCTAssertEqual(state.count, 3)
         XCTAssertEqual(state.displayedCount, 1)
 
-        await waitUntil { state.displayedCount == 3 }
+        await show([1, 2, 3], in: state)
         XCTAssertEqual(state.displayedCount, 3)
     }
 
-    func testState_whenItemIsAppendedDuringAPush_shouldWaitForItToFinish() async throws {
+    func testState_whenItemIsAppendedDuringAPush_shouldWaitForItToAppear() async throws {
         // Given
         let state = FallbackNavigationState()
         state.append(1)
@@ -260,6 +272,22 @@ class FallbackNavigationStatePresentationTests: XCTestCase {
         XCTAssertEqual(state.count, 2)
         XCTAssertEqual(state.displayedCount, 1)
 
+        state.didAppear(at: 0)
+        XCTAssertEqual(state.displayedCount, 1, "The push of the first item is still in progress")
+
+        await waitUntil { state.displayedCount == 2 }
+        XCTAssertEqual(state.displayedCount, 2)
+    }
+
+    func testState_whenTheItemNeverAppears_shouldPushTheNextOneAnyway() async throws {
+        // Given
+        let state = FallbackNavigationState()
+        state.append(1)
+
+        // When
+        state.append(2)
+
+        // Then
         await waitUntil { state.displayedCount == 2 }
         XCTAssertEqual(state.displayedCount, 2)
     }
@@ -267,8 +295,7 @@ class FallbackNavigationStatePresentationTests: XCTestCase {
     func testState_whenItemsAreRemoved_shouldStopDisplayingThemAtOnce() async throws {
         // Given
         let state = FallbackNavigationState()
-        state.setItems([1, 2, 3])
-        await waitUntil { state.displayedCount == 3 }
+        await show([1, 2, 3], in: state)
 
         // When
         state.removeLast()
@@ -281,8 +308,7 @@ class FallbackNavigationStatePresentationTests: XCTestCase {
     func testState_whenTruncated_shouldKeepTheFirstItems() async throws {
         // Given
         let state = FallbackNavigationState()
-        state.setItems([1, 2, 3])
-        await waitUntil { state.displayedCount == 3 }
+        await show([1, 2, 3], in: state)
 
         // When
         state.truncate(to: 1)

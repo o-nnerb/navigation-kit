@@ -177,6 +177,9 @@ private struct _FallbackStackDestination: View {
     var body: some View {
         if let entry {
             (destinations.view(for: entry.value) ?? AnyView(EmptyView()))
+                .onAppear {
+                    state.didAppear(at: index)
+                }
                 .backgroundPreferenceValue(FallbackDestinationsKey.self) { local in
                     _FallbackStackLink(
                         state: state,

@@ -9,9 +9,14 @@ import SwiftUI
 @MainActor
 final class FallbackNavigationState: ObservableObject {
 
-    /// How long a push takes to finish. The navigation of the system ignores (and reports as dismissed)
-    /// a push started before the previous one is done, so the items are shown one at a time.
-    private static let transitionDuration: TimeInterval = 0.55
+    /// How long after the screen of an item appears (which is when its push starts) the next item can
+    /// be pushed. The navigation of the system ignores (and reports as dismissed) a push started
+    /// before the previous one is done, so the items are shown one at a time.
+    private static let settleDelay: TimeInterval = 0.5
+
+    /// How long to wait for the screen of an item to appear before pushing the next one anyway, for
+    /// when it never does (for example, a detail that is not on screen).
+    private static let appearTimeout: TimeInterval = 1.5
 
     private(set) var entries = [NavigationEntry]()
 
@@ -21,6 +26,7 @@ final class FallbackNavigationState: ObservableObject {
 
     private var lastPendingNavigationItemsHashValue: Int?
     private var lastPush: Date?
+    private var lastAppear: Date?
     private var reconciliation: Task<Void, Never>?
 
     init() {}
@@ -37,8 +43,15 @@ final class FallbackNavigationState: ObservableObject {
         entries = pendingItems?.entries ?? []
         displayedCount = 0
         lastPush = nil
+        lastAppear = nil
 
         // Called while a view is updated, which cannot publish changes: the first push is deferred.
+        reconcile(deferred: true)
+    }
+
+    /// Called when the screen of the item at `index` appears, which is when its push starts.
+    func didAppear(at index: Int) {
+        lastAppear = Date()
         reconcile(deferred: true)
     }
 
@@ -69,7 +82,7 @@ final class FallbackNavigationState: ObservableObject {
             return
         }
 
-        let wait = lastPush.map { Self.transitionDuration - Date().timeIntervalSince($0) } ?? 0
+        let wait = waitBeforeNextPush()
 
         if wait <= 0 && !deferred {
             objectWillChange.send()
@@ -88,6 +101,20 @@ final class FallbackNavigationState: ObservableObject {
 
             self?.reconcile(deferred: false)
         }
+    }
+
+    private func waitBeforeNextPush() -> TimeInterval {
+        guard let lastPush else {
+            return 0
+        }
+
+        let now = Date()
+
+        if let lastAppear, lastAppear >= lastPush {
+            return max(Self.settleDelay - now.timeIntervalSince(lastAppear), 0)
+        }
+
+        return max(Self.appearTimeout - now.timeIntervalSince(lastPush), 0)
     }
 
     private func index<Item: Hashable>(of item: Item) -> Int? {
