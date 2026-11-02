@@ -3,6 +3,7 @@
 
 import SwiftUI
 
+@available(iOS 16.0, tvOS 16.0, macOS 13.0, *)
 @MainActor
 final class NavigationState: ObservableObject {
 
@@ -53,6 +54,7 @@ final class NavigationState: ObservableObject {
 
 // MARK: - NavigationStateProtocol
 
+@available(iOS 16.0, tvOS 16.0, macOS 13.0, *)
 extension NavigationState: NavigationStateProtocol {
 
     func setItems<Item: Hashable>(_ items: [Item]) {
@@ -173,12 +175,14 @@ extension NavigationState: NavigationStateProtocol {
     }
 
     var codable: NavigationAction.CodableRepresentation? {
-        path.codable.map {
-            .init(
-                navigationPath: $0,
-                hashes: hashes
-            )
-        }
+        path.codable
+            .flatMap { NavigationPathCodec.strings(from: $0) }
+            .map {
+                .init(
+                    navigationPath: $0,
+                    hashes: hashes
+                )
+            }
     }
 
     func contains<Item: Hashable>(_ item: Item) -> Bool {

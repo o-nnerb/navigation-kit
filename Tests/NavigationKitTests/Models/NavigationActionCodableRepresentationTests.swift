@@ -9,59 +9,99 @@ import XCTest
 // swiftlint:disable type_name
 class NavigationActionCodableRepresentationTests: XCTestCase {
 
-    func testRepresentation_whenInstantiateWithEmpty_shouldBeEmpty() async throws {
+    func testRepresentation_whenInstantiate_shouldKeepValues() async throws {
         // Given
-        let path = NavigationPath([1])
+        let navigationPath = ["Swift.Int", "1"]
         let hashes = [1]
 
         // When
-        let sut = path.codable.map {
-            NavigationAction.CodableRepresentation(
-                navigationPath: $0,
-                hashes: hashes
-            )
-        }
+        let sut = NavigationAction.CodableRepresentation(
+            navigationPath: navigationPath,
+            hashes: hashes
+        )
 
         // Then
-        XCTAssertEqual(sut?.navigationPath, path.codable)
-        XCTAssertEqual(sut?.hashes, hashes)
+        XCTAssertEqual(sut.navigationPath, navigationPath)
+        XCTAssertEqual(sut.hashes, hashes)
     }
 
     func testRepresentation_whenCoded_shouldBeValid() async throws {
         // Given
-        let path = NavigationPath([1])
+        let navigationPath = ["Swift.Int", "1"]
         let hashes = [1]
 
         let encoder = JSONEncoder()
         let decoder = JSONDecoder()
 
         // When
-        let codableRepresentation = path.codable.map {
+        let data = try encoder.encode(
             NavigationAction.CodableRepresentation(
-                navigationPath: $0,
+                navigationPath: navigationPath,
                 hashes: hashes
             )
-        }
+        )
 
-        let data = try codableRepresentation.map {
-            try encoder.encode($0)
-        }
-
-        let sut = try data.map {
-            try decoder.decode(NavigationAction.CodableRepresentation.self, from: $0)
-        }
+        let sut = try decoder.decode(NavigationAction.CodableRepresentation.self, from: data)
 
         // Then
-        XCTAssertNotNil(sut)
-        XCTAssertEqual(sut?.hashes, hashes)
+        XCTAssertEqual(sut.navigationPath, navigationPath)
+        XCTAssertEqual(sut.hashes, hashes)
+    }
 
-        XCTAssertEqual(
-            sut?.navigationPath,
-            try {
-                try path.codable
-                    .map { try encoder.encode($0) }
-                    .map { try decoder.decode(NavigationPath.CodableRepresentation.self, from: $0) }
-            }()
+    func testRepresentation_whenEncoded_shouldKeepTheFormatOfThePreviousVersions() async throws {
+        // Given
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .sortedKeys
+
+        // When
+        let data = try encoder.encode(
+            NavigationAction.CodableRepresentation(
+                navigationPath: ["Swift.Int", "1"],
+                hashes: [1]
+            )
         )
+
+        // Then
+        XCTAssertEqual(
+            String(decoding: data, as: UTF8.self),
+            #"{"hashes":[1],"navigationPath":["Swift.Int","1"]}"#
+        )
+    }
+}
+
+@available(iOS 16.0, tvOS 16.0, macOS 13.0, *)
+class NavigationPathCodecTests: XCTestCase {
+
+    func testCodec_whenPathIsCodable_shouldMatchTheSystemFormat() async throws {
+        // Given
+        var path = NavigationPath()
+        path.append(1)
+        path.append("text")
+
+        // When
+        let strings = try XCTUnwrap(path.codable.flatMap { NavigationPathCodec.strings(from: $0) })
+
+        // Then
+        XCTAssertEqual(strings, ["Swift.String", "\"text\"", "Swift.Int", "1"])
+    }
+
+    func testCodec_whenStringsAreValid_shouldRestoreThePath() async throws {
+        // Given
+        var path = NavigationPath()
+        path.append(1)
+        path.append("text")
+
+        let strings = try XCTUnwrap(path.codable.flatMap { NavigationPathCodec.strings(from: $0) })
+
+        // When
+        let restored = try XCTUnwrap(NavigationPathCodec.path(from: strings))
+
+        // Then
+        XCTAssertEqual(restored.count, 2)
+        XCTAssertEqual(restored.codable.flatMap { NavigationPathCodec.strings(from: $0) }, strings)
+    }
+
+    func testCodec_whenStringsHaveAnOddCount_shouldBeNil() async throws {
+        XCTAssertNil(NavigationPathCodec.path(from: ["Swift.Int"]))
     }
 }

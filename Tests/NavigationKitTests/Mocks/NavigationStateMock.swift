@@ -67,18 +67,7 @@ class NavigationStateMock: NavigationStateProtocol {
     }
 
     var codable: NavigationAction.CodableRepresentation? {
-        var navigationPath = NavigationPath()
-
-        for item in stack {
-            navigationPath.append(item)
-        }
-
-        return navigationPath.codable.map {
-            .init(
-                navigationPath: $0,
-                hashes: stack.map(\.hashValue)
-            )
-        }
+        nil
     }
 
     func contains<Item: Hashable>(_ item: Item) -> Bool {
