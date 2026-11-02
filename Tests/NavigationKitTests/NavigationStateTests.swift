@@ -21,6 +21,22 @@ class NavigationStateTests: XCTestCase {
         fatalError("Override makeState()")
     }
 
+    /// Gives `state` the items a stack starts with, like the stack view does.
+    func apply(_ pendingItems: PendingNavigationItems, to state: NavigationStateProtocol) {
+        fatalError("Override apply(_:to:)")
+    }
+
+    /// A representation as saved by another launch of the app: `hashValue` is different on each
+    /// launch, so the saved hashes mean nothing to this one.
+    private var restoredFromAnotherLaunch: PendingNavigationItems {
+        PendingNavigationItems(
+            NavigationAction.CodableRepresentation(
+                navigationPath: ["Swift.Int", "2", "Swift.Int", "1"],
+                hashes: [1.hashValue &+ 7, 2.hashValue &+ 7]
+            )
+        )
+    }
+
     func testNavigationState_whenEmpty_shouldBeEmpty() async throws {
         // Given
         let navigationState = makeState()
@@ -199,6 +215,86 @@ class NavigationStateTests: XCTestCase {
         // Then
         XCTAssertNil(navigationState.codable)
     }
+
+    // MARK: - Restored items
+
+    func testNavigationState_whenRestored_shouldFindTheItems() async throws {
+        // Given
+        let navigationState = makeState()
+
+        // When
+        apply(restoredFromAnotherLaunch, to: navigationState)
+
+        // Then
+        XCTAssertEqual(navigationState.count, 2)
+        XCTAssertTrue(navigationState.contains(1))
+        XCTAssertTrue(navigationState.contains(2))
+    }
+
+    func testNavigationState_whenRestored_shouldRemoveAnItemKeepingTheOthers() async throws {
+        // Given
+        let navigationState = makeState()
+        apply(restoredFromAnotherLaunch, to: navigationState)
+
+        // When
+        navigationState.remove(1)
+
+        // Then
+        XCTAssertEqual(navigationState.count, 1)
+        XCTAssertFalse(navigationState.contains(1))
+        XCTAssertTrue(navigationState.contains(2))
+    }
+
+    func testNavigationState_whenRestored_shouldRemoveIncludingAnItem() async throws {
+        // Given
+        let navigationState = makeState()
+        apply(restoredFromAnotherLaunch, to: navigationState)
+
+        // When
+        navigationState.removeIncluding(2)
+
+        // Then
+        XCTAssertEqual(navigationState.count, 1)
+        XCTAssertTrue(navigationState.contains(1))
+    }
+
+    func testNavigationState_whenRestored_shouldRemoveUntilAnItem() async throws {
+        // Given
+        let navigationState = makeState()
+        apply(restoredFromAnotherLaunch, to: navigationState)
+
+        // When
+        navigationState.removeUntil(1)
+
+        // Then
+        XCTAssertEqual(navigationState.count, 1)
+        XCTAssertTrue(navigationState.contains(1))
+        XCTAssertFalse(navigationState.contains(2))
+    }
+
+    func testNavigationState_whenRestored_shouldCodableHaveTheHashesOfThisLaunch() async throws {
+        // Given
+        let navigationState = makeState()
+        apply(restoredFromAnotherLaunch, to: navigationState)
+
+        // Then
+        XCTAssertEqual(navigationState.codable?.hashes, [1.hashValue, 2.hashValue])
+    }
+
+    func testNavigationState_whenStartedWithASequence_shouldRemoveAnItemKeepingTheOthers() async throws {
+        // Given
+        let navigationState = makeState()
+        apply(PendingNavigationItems([1, 2, 3]), to: navigationState)
+
+        // When
+        navigationState.remove(2)
+
+        // Then
+        XCTAssertEqual(navigationState.count, 2)
+        XCTAssertTrue(navigationState.contains(1))
+        XCTAssertFalse(navigationState.contains(2))
+        XCTAssertTrue(navigationState.contains(3))
+    }
 }
 
 @available(iOS 16.0, tvOS 16.0, macOS 13.0, *)
@@ -208,6 +304,14 @@ class SystemNavigationStateTests: NavigationStateTests {
     override func makeState() -> NavigationStateProtocol {
         NavigationState()
     }
+
+    override func apply(_ pendingItems: PendingNavigationItems, to state: NavigationStateProtocol) {
+        guard let state = state as? NavigationState else {
+            return XCTFail("Expected a NavigationState")
+        }
+
+        _ = state[pendingItems]
+    }
 }
 
 @MainActor
@@ -215,6 +319,14 @@ class FallbackNavigationStateTests: NavigationStateTests {
 
     override func makeState() -> NavigationStateProtocol {
         FallbackNavigationState()
+    }
+
+    override func apply(_ pendingItems: PendingNavigationItems, to state: NavigationStateProtocol) {
+        guard let state = state as? FallbackNavigationState else {
+            return XCTFail("Expected a FallbackNavigationState")
+        }
+
+        state.update(pendingItems)
     }
 }
 

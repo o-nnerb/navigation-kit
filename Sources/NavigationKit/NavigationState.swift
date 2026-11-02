@@ -45,6 +45,18 @@ final class NavigationState: ObservableObject {
         lastPendingNavigationItemsHashValue = hashValue
         hashes = pendingItems?.hashes ?? []
         _path = pendingItems?.path ?? .init()
+
+        // The path cannot be read back item by item, so the items that start the stack need a way to
+        // be appended again, for `remove(_:)` to rebuild the path without them.
+        restore = [:]
+
+        for entry in pendingItems?.entries ?? [] {
+            restore[entry.hash] = { [weak self] in
+                if let self {
+                    entry.appendToState(self)
+                }
+            }
+        }
     }
 
     private func updateHashes() {

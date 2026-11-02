@@ -12,6 +12,9 @@ struct NavigationEntry: Identifiable {
     /// The JSON of the value. Only items that are `Codable` have one.
     private let encodeValue: (() throws -> String)?
 
+    /// Appends the item to a navigation state. Used to rebuild a stack that starts with these items.
+    let appendToState: @MainActor (NavigationStateProtocol) -> Void
+
     var hash: Int {
         value.hashValue
     }
@@ -19,6 +22,8 @@ struct NavigationEntry: Identifiable {
     init<Item: Hashable>(_ item: Item) {
         self.value = AnyHashable(item)
         self.encodeValue = nil
+        let box = UncheckedSendable(value: item)
+        self.appendToState = { $0.append(box.value) }
     }
 
     init<Item: Hashable & Codable>(_ item: Item) {
@@ -26,6 +31,8 @@ struct NavigationEntry: Identifiable {
         self.encodeValue = {
             String(decoding: try JSONEncoder().encode(item), as: UTF8.self)
         }
+        let box = UncheckedSendable(value: item)
+        self.appendToState = { $0.append(box.value) }
     }
 
     var isCodable: Bool {
