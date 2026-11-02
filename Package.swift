@@ -5,7 +5,7 @@ import PackageDescription
 
 let package = Package(
     name: "NavigationKit",
-    platforms: [.iOS(.v16), .tvOS(.v16), .macOS(.v13), .watchOS(.v9)],
+    platforms: [.iOS(.v16), .tvOS(.v16), .macOS(.v13), .watchOS(.v9), .visionOS(.v1)],
     products: [
         .library(
             name: "NavigationKit",

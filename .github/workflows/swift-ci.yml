@@ -48,7 +48,7 @@ jobs:
       enable-format: true
       format-swift-version: '6.4'
 
-      # Step 4 – Apple (NavigationKit declares iOS, tvOS, macOS and watchOS only)
+      # Step 4 – Apple (NavigationKit declares iOS, tvOS, macOS, watchOS and visionOS)
       enable-apple-tests: true
       package-name: "NavigationKit"
       xcode-version: '27.1'
@@ -57,6 +57,7 @@ jobs:
         [{"destination":"platform=iOS Simulator,arch=arm64,name=iPhone 18 Pro,OS=27.0","name":"iOS"},
         {"destination":"platform=watchOS Simulator,arch=arm64,name=Apple Watch Series 12 (42mm),OS=27.0","name":"watchOS"},
         {"destination":"platform=tvOS Simulator,arch=arm64,name=Apple TV 4K (3rd generation) (at 1080p),OS=27.0","name":"tvOS"},
+        {"destination":"platform=visionOS Simulator,arch=arm64,name=Apple Vision Pro,OS=27.0","name":"visionOS"},
         {"destination":"platform=macOS,arch=arm64,name=My Mac","name":"macOS"}]
 
       # Step 5
