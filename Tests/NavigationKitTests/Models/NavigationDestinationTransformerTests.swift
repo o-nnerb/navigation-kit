@@ -1,34 +1,27 @@
 // Copyright 2026 Brenno Giovanini de Moura
 // SPDX-License-Identifier: MIT
 
-import XCTest
+import Testing
 
 @testable import NavigationKit
 
 @MainActor
-class NavigationDestinationTransformerTests: XCTestCase {
+@Suite struct NavigationDestinationTransformerTests {
 
-    var navigationState: NavigationStateMock!
-    var navigationAction: NavigationAction!
+    let navigationState: NavigationStateMock
+    let navigationAction: NavigationAction
 
-    override func setUp() async throws {
-        try await super.setUp()
+    init() {
         let navigationState = NavigationStateMock()
-        navigationAction = .init(navigationState)
         self.navigationState = navigationState
-    }
-
-    override func tearDown() async throws {
-        try await super.tearDown()
-        navigationState = nil
-        navigationAction = nil
+        navigationAction = .init(navigationState)
     }
 
     struct NotCodable<Value: Sendable>: Sendable, Hashable where Value: Hashable {
         let value: Value
     }
 
-    func testTransformer_whenAppendActionCodable_shouldContainsString() async throws {
+    @Test func transformer_whenAppendActionCodable_shouldContainsString() async throws {
         // Given
         let value = "Hello World"
         let sut = NavigationDestinationTransformer(.append)
@@ -38,10 +31,10 @@ class NavigationDestinationTransformerTests: XCTestCase {
         sut.perform(navigationAction)
 
         // Then
-        XCTAssertEqual(navigationState.stack, [value])
+        #expect(navigationState.stack == [value])
     }
 
-    func testTransformer_whenSetItemsActionCodable_shouldBeValid() async throws {
+    @Test func transformer_whenSetItemsActionCodable_shouldBeValid() async throws {
         // Given
         let value = "Hello World"
         let sut = NavigationDestinationTransformer(.setItems)
@@ -52,10 +45,10 @@ class NavigationDestinationTransformerTests: XCTestCase {
         sut.perform(navigationAction)
 
         // Then
-        XCTAssertEqual(navigationState.stack, [value])
+        #expect(navigationState.stack == [value])
     }
 
-    func testTransformer_whenRemoveItemActionCodable_shouldBeEmpty() async throws {
+    @Test func transformer_whenRemoveItemActionCodable_shouldBeEmpty() async throws {
         // Given
         let value = "Hello World"
         let sut = NavigationDestinationTransformer(.remove)
@@ -66,10 +59,10 @@ class NavigationDestinationTransformerTests: XCTestCase {
         sut.perform(navigationAction)
 
         // Then
-        XCTAssertTrue(navigationState.stack.isEmpty)
+        #expect(navigationState.stack.isEmpty)
     }
 
-    func testTransformer_whenRemoveUntilActionCodable_shouldBeValid() async throws {
+    @Test func transformer_whenRemoveUntilActionCodable_shouldBeValid() async throws {
         // Given
         let value = 2
         let items = [1, value, 3]
@@ -81,10 +74,10 @@ class NavigationDestinationTransformerTests: XCTestCase {
         sut.perform(navigationAction)
 
         // Then
-        XCTAssertEqual(navigationState.stack, Array(items[0...(items.firstIndex(of: value) ?? .zero)]))
+        #expect(navigationState.stack == Array(items[0...(items.firstIndex(of: value) ?? .zero)]).map(AnyHashable.init))
     }
 
-    func testTransformer_whenRemoveIncludingActionCodable_shouldBeValid() async throws {
+    @Test func transformer_whenRemoveIncludingActionCodable_shouldBeValid() async throws {
         // Given
         let value = 2
         let items = [1, value, 3]
@@ -96,10 +89,10 @@ class NavigationDestinationTransformerTests: XCTestCase {
         sut.perform(navigationAction)
 
         // Then
-        XCTAssertEqual(navigationState.stack, Array(items[0..<(items.firstIndex(of: value) ?? .zero)]))
+        #expect(navigationState.stack == Array(items[0..<(items.firstIndex(of: value) ?? .zero)]).map(AnyHashable.init))
     }
 
-    func testTransformer_whenContainsCodable_shouldBeTrue() async throws {
+    @Test func transformer_whenContainsCodable_shouldBeTrue() async throws {
         // Given
         let value = 2
         let items = Array(1...3)
@@ -111,10 +104,10 @@ class NavigationDestinationTransformerTests: XCTestCase {
         sut.perform(navigationAction)
 
         // Then
-        XCTAssertEqual(navigationAction.count, items.count)
+        #expect(navigationAction.count == items.count)
     }
 
-    func testTransformer_whenContainsCodable_shouldBeFalse() async throws {
+    @Test func transformer_whenContainsCodable_shouldBeFalse() async throws {
         // Given
         let value = 0
         let items = Array(1...3)
@@ -126,10 +119,10 @@ class NavigationDestinationTransformerTests: XCTestCase {
         sut.perform(navigationAction)
 
         // Then
-        XCTAssertEqual(navigationAction.count, items.count)
+        #expect(navigationAction.count == items.count)
     }
 
-    func testTransformer_whenAppendAction_shouldContainsString() async throws {
+    @Test func transformer_whenAppendAction_shouldContainsString() async throws {
         // Given
         let value = NotCodable(value: "Hello World")
         let sut = NavigationDestinationTransformer(.append)
@@ -139,10 +132,10 @@ class NavigationDestinationTransformerTests: XCTestCase {
         sut.perform(navigationAction)
 
         // Then
-        XCTAssertEqual(navigationState.stack, [value])
+        #expect(navigationState.stack == [value])
     }
 
-    func testTransformer_whenSetItemsAction_shouldBeValid() async throws {
+    @Test func transformer_whenSetItemsAction_shouldBeValid() async throws {
         // Given
         let value = NotCodable(value: "Hello World")
         let sut = NavigationDestinationTransformer(.setItems)
@@ -153,10 +146,10 @@ class NavigationDestinationTransformerTests: XCTestCase {
         sut.perform(navigationAction)
 
         // Then
-        XCTAssertEqual(navigationState.stack, [value])
+        #expect(navigationState.stack == [value])
     }
 
-    func testTransformer_whenRemoveItemAction_shouldBeEmpty() async throws {
+    @Test func transformer_whenRemoveItemAction_shouldBeEmpty() async throws {
         // Given
         let value = NotCodable(value: "Hello World")
         let sut = NavigationDestinationTransformer(.remove)
@@ -167,10 +160,10 @@ class NavigationDestinationTransformerTests: XCTestCase {
         sut.perform(navigationAction)
 
         // Then
-        XCTAssertTrue(navigationState.stack.isEmpty)
+        #expect(navigationState.stack.isEmpty)
     }
 
-    func testTransformer_whenRemoveUntilAction_shouldBeValid() async throws {
+    @Test func transformer_whenRemoveUntilAction_shouldBeValid() async throws {
         // Given
         let value = NotCodable(value: 2)
         let items = [NotCodable(value: 1), value, NotCodable(value: 3)]
@@ -182,10 +175,10 @@ class NavigationDestinationTransformerTests: XCTestCase {
         sut.perform(navigationAction)
 
         // Then
-        XCTAssertEqual(navigationState.stack, Array(items[0...(items.firstIndex(of: value) ?? .zero)]))
+        #expect(navigationState.stack == Array(items[0...(items.firstIndex(of: value) ?? .zero)]).map(AnyHashable.init))
     }
 
-    func testTransformer_whenRemoveIncludingAction_shouldBeValid() async throws {
+    @Test func transformer_whenRemoveIncludingAction_shouldBeValid() async throws {
         // Given
         let value = NotCodable(value: 2)
         let items = [NotCodable(value: 1), value, NotCodable(value: 3)]
@@ -197,10 +190,10 @@ class NavigationDestinationTransformerTests: XCTestCase {
         sut.perform(navigationAction)
 
         // Then
-        XCTAssertEqual(navigationState.stack, Array(items[0..<(items.firstIndex(of: value) ?? .zero)]))
+        #expect(navigationState.stack == Array(items[0..<(items.firstIndex(of: value) ?? .zero)]).map(AnyHashable.init))
     }
 
-    func testTransformer_whenContains_shouldBeTrue() async throws {
+    @Test func transformer_whenContains_shouldBeTrue() async throws {
         // Given
         let value = NotCodable(value: 2)
         let items = (1...3).map {
@@ -214,10 +207,10 @@ class NavigationDestinationTransformerTests: XCTestCase {
         sut.perform(navigationAction)
 
         // Then
-        XCTAssertEqual(navigationAction.count, items.count)
+        #expect(navigationAction.count == items.count)
     }
 
-    func testTransformer_whenContains_shouldBeFalse() async throws {
+    @Test func transformer_whenContains_shouldBeFalse() async throws {
         // Given
         let value = NotCodable(value: 0)
         let items = (1...3).map {
@@ -231,6 +224,6 @@ class NavigationDestinationTransformerTests: XCTestCase {
         sut.perform(navigationAction)
 
         // Then
-        XCTAssertEqual(navigationAction.count, items.count)
+        #expect(navigationAction.count == items.count)
     }
 }

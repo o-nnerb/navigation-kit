@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: MIT
 
 import SwiftUI
-import XCTest
+import Testing
 
 @testable import NavigationKit
 
-class PendingNavigationItemsTests: XCTestCase {
+@Suite struct PendingNavigationItemsTests {
 
-    func testPendingItems_whenIsEmpty_shouldBeEmpty() async throws {
+    @Test func pendingItems_whenIsEmpty_shouldBeEmpty() async throws {
         // Given
         let items = [Int]()
 
@@ -16,15 +16,15 @@ class PendingNavigationItemsTests: XCTestCase {
         let pending = PendingNavigationItems(items)
 
         // Then
-        XCTAssertTrue(pending.entries.isEmpty)
-        XCTAssertEqual(pending.hashes, [])
+        #expect(pending.entries.isEmpty)
+        #expect(pending.hashes == [])
 
         if #available(iOS 16.0, tvOS 16.0, macOS 13.0, *) {
-            XCTAssertEqual(pending.path.count, 0)
+            #expect(pending.path.count == 0)
         }
     }
 
-    func testPendingItems_whenContainsOneElement_shouldBeOne() async throws {
+    @Test func pendingItems_whenContainsOneElement_shouldBeOne() async throws {
         // Given
         let items = [1]
 
@@ -32,15 +32,15 @@ class PendingNavigationItemsTests: XCTestCase {
         let pending = PendingNavigationItems(items)
 
         // Then
-        XCTAssertEqual(pending.entries.map(\.value), [AnyHashable(1)])
-        XCTAssertEqual(pending.hashes, [1.hashValue])
+        #expect(pending.entries.map(\.value) == [AnyHashable(1)])
+        #expect(pending.hashes == [1.hashValue])
 
         if #available(iOS 16.0, tvOS 16.0, macOS 13.0, *) {
-            XCTAssertEqual(pending.path.count, 1)
+            #expect(pending.path.count == 1)
         }
     }
 
-    func testPendingItems_whenInstantiateWithCodableRepresentation_shouldBeValid() async throws {
+    @Test func pendingItems_whenInstantiateWithCodableRepresentation_shouldBeValid() async throws {
         // Given
         let codableRepresentation = NavigationAction.CodableRepresentation(
             navigationPath: ["Swift.Int", "1"],
@@ -51,18 +51,18 @@ class PendingNavigationItemsTests: XCTestCase {
         let pending = PendingNavigationItems(codableRepresentation)
 
         // Then
-        XCTAssertEqual(pending.entries.map(\.value), [AnyHashable(1)])
+        #expect(pending.entries.map(\.value) == [AnyHashable(1)])
 
         if #available(iOS 16.0, tvOS 16.0, macOS 13.0, *) {
-            XCTAssertEqual(pending.path.count, 1)
-            XCTAssertEqual(
-                pending.path.codable.flatMap { NavigationPathCodec.strings(from: $0) },
-                ["Swift.Int", "1"]
+            #expect(pending.path.count == 1)
+            #expect(
+                pending.path.codable.flatMap { NavigationPathCodec.strings(from: $0) }
+                    == ["Swift.Int", "1"]
             )
         }
     }
 
-    func testPendingItems_whenInstantiateWithCodableRepresentation_shouldHashTheItemsOfThisLaunch() async throws {
+    @Test func pendingItems_whenInstantiateWithCodableRepresentation_shouldHashTheItemsOfThisLaunch() async throws {
         // Given
         // `hashValue` is different on each launch, so the hashes saved by another launch are useless.
         let codableRepresentation = NavigationAction.CodableRepresentation(
@@ -74,10 +74,10 @@ class PendingNavigationItemsTests: XCTestCase {
         let pending = PendingNavigationItems(codableRepresentation)
 
         // Then
-        XCTAssertEqual(pending.hashes, [1.hashValue, 2.hashValue])
+        #expect(pending.hashes == [1.hashValue, 2.hashValue])
     }
 
-    func testPendingItems_whenCodableRepresentationIsInvalid_shouldKeepTheSavedHashes() async throws {
+    @Test func pendingItems_whenCodableRepresentationIsInvalid_shouldKeepTheSavedHashes() async throws {
         // Given
         let codableRepresentation = NavigationAction.CodableRepresentation(
             navigationPath: ["NavigationKit.DoesNotExist", "1"],
@@ -88,7 +88,7 @@ class PendingNavigationItemsTests: XCTestCase {
         let pending = PendingNavigationItems(codableRepresentation)
 
         // Then
-        XCTAssertTrue(pending.entries.isEmpty)
-        XCTAssertEqual(pending.hashes, [42])
+        #expect(pending.entries.isEmpty)
+        #expect(pending.hashes == [42])
     }
 }

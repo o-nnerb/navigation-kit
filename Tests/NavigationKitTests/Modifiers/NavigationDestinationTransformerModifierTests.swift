@@ -1,27 +1,17 @@
 // Copyright 2026 Brenno Giovanini de Moura
 // SPDX-License-Identifier: MIT
 
-import XCTest
+import Testing
 
 @testable import NavigationKit
 
 // swiftlint:disable type_name
 @MainActor
-class NavigationDestinationTransformerModifierTests: XCTestCase {
+@Suite struct NavigationDestinationTransformerModifierTests {
 
-    var navigationAction: NavigationAction!
+    let navigationAction = NavigationAction(FallbackNavigationState())
 
-    override func setUp() async throws {
-        try await super.setUp()
-        navigationAction = .init(FallbackNavigationState())
-    }
-
-    override func tearDown() async throws {
-        try await super.tearDown()
-        navigationAction = nil
-    }
-
-    func testModifier_whenAppendString_shouldContainsString() async throws {
+    @Test func modifier_whenAppendString_shouldContainsString() async throws {
         // Given
         let value = 1
 
@@ -39,10 +29,10 @@ class NavigationDestinationTransformerModifierTests: XCTestCase {
         navigationAction.append("\(value)")
 
         // Then
-        XCTAssertTrue(navigationAction.contains("\(value)"))
+        #expect(navigationAction.contains("\(value)"))
     }
 
-    func testModifier_whenAppendString_shouldBeInt() async throws {
+    @Test func modifier_whenAppendString_shouldBeInt() async throws {
         // Given
         let value = 1
 
@@ -60,10 +50,10 @@ class NavigationDestinationTransformerModifierTests: XCTestCase {
         navigationAction.append("\(value)")
 
         // Then
-        XCTAssertTrue(navigationAction.contains(value))
+        #expect(navigationAction.contains(value))
     }
 
-    func testModifier_whenAppendString_shouldNotContainsOtherValue() async throws {
+    @Test func modifier_whenAppendString_shouldNotContainsOtherValue() async throws {
         // Given
         let value = 1
 
@@ -81,6 +71,6 @@ class NavigationDestinationTransformerModifierTests: XCTestCase {
         navigationAction.append("\(value)")
 
         // Then
-        XCTAssertFalse(navigationAction.contains(value + 1))
+        #expect(!navigationAction.contains(value + 1))
     }
 }

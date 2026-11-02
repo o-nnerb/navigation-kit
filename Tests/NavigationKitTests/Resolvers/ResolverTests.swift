@@ -1,16 +1,16 @@
 // Copyright 2026 Brenno Giovanini de Moura
 // SPDX-License-Identifier: MIT
 
-import XCTest
+import Testing
 
 @testable import NavigationKit
 
 @MainActor
-class ResolverTests: XCTestCase {
+@Suite struct ResolverTests {
 
     struct HashKey: Hashable {}
 
-    func testResolver_whenRegister_shouldResolveHashKey() async throws {
+    @Test func resolver_whenRegister_shouldResolveHashKey() async throws {
         // Given
         var resolver = Resolver<HashKey, Int>()
         let seed = Seed()
@@ -21,10 +21,10 @@ class ResolverTests: XCTestCase {
         resolver.register(value, forKey: key, with: seed)
 
         // Then
-        XCTAssertEqual(resolver(key), value)
+        #expect(resolver(key) == value)
     }
 
-    func testResolver_whenAlreadyRegister_shouldResolveFirstValue() async throws {
+    @Test func resolver_whenAlreadyRegister_shouldResolveFirstValue() async throws {
         // Given
         var resolver = Resolver<HashKey, Int>()
         let seed = Seed()
@@ -37,10 +37,10 @@ class ResolverTests: XCTestCase {
         resolver.register(value2, forKey: key, with: seed)
 
         // Then
-        XCTAssertEqual(resolver(key), value1)
+        #expect(resolver(key) == value1)
     }
 
-    func testResolver_whenAlreadyRegisterButSeedChange_shouldResolveSecondValue() async throws {
+    @Test func resolver_whenAlreadyRegisterButSeedChange_shouldResolveSecondValue() async throws {
         // Given
         var resolver = Resolver<HashKey, Int>()
         var seed = Seed()
@@ -54,6 +54,6 @@ class ResolverTests: XCTestCase {
         resolver.register(value2, forKey: key, with: seed)
 
         // Then
-        XCTAssertEqual(resolver(key), value2)
+        #expect(resolver(key) == value2)
     }
 }

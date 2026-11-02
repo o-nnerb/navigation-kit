@@ -1,13 +1,13 @@
 // Copyright 2026 Brenno Giovanini de Moura
 // SPDX-License-Identifier: MIT
 
-import XCTest
+import Testing
 
 @testable import NavigationKit
 
-class FactoryTests: XCTestCase {
+@Suite struct FactoryTests {
 
-    func testFactory_whenInstantiate_shouldBeEqual() {
+    @Test func factory_whenInstantiate_shouldBeEqual() {
         // Given
         let seed = Seed()
         let value = 1
@@ -16,11 +16,11 @@ class FactoryTests: XCTestCase {
         let sut = Factory(value, with: seed)
 
         // Then
-        XCTAssertEqual(sut.value, value)
-        XCTAssertEqual(sut.seed, seed)
+        #expect(sut.value == value)
+        #expect(sut.seed == seed)
     }
 
-    func testFactory_whenInstantiateWithWeakSeed_shouldBeNilSeed() {
+    @Test func factory_whenInstantiateWithWeakSeed_shouldBeNilSeed() {
         // Given
         let value = 0
 
@@ -28,7 +28,7 @@ class FactoryTests: XCTestCase {
         let sut = Factory(value, with: .init())
 
         // Then
-        XCTAssertEqual(sut.value, value)
-        XCTAssertNil(sut.seed)
+        #expect(sut.value == value)
+        #expect(sut.seed == nil)
     }
 }

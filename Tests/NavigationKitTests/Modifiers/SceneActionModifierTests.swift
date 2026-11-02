@@ -4,12 +4,12 @@
 #if os(macOS)
 import AppKit
 import SwiftUI
-import XCTest
+import Testing
 
 @testable import NavigationKit
 
 @MainActor
-class SceneActionModifierTests: XCTestCase {
+@Suite struct SceneActionModifierTests {
 
     private final class Recorder {
         var received = [Int]()
@@ -75,7 +75,7 @@ class SceneActionModifierTests: XCTestCase {
         }
     }
 
-    func testModifier_whenActionPerformedRightAfterBuilding_shouldBePerformed() async throws {
+    @Test func modifier_whenActionPerformedRightAfterBuilding_shouldBePerformed() async throws {
         // Given
         let sceneAction = SceneAction()
         let recorder = Recorder()
@@ -88,11 +88,11 @@ class SceneActionModifierTests: XCTestCase {
         await waitUntil { recorder.received.count == 2 }
 
         // Then
-        XCTAssertEqual(recorder.received, [1, 2])
+        #expect(recorder.received == [1, 2])
         window.close()
     }
 
-    func testModifier_whenActionPerformedLater_shouldBePerformed() async throws {
+    @Test func modifier_whenActionPerformedLater_shouldBePerformed() async throws {
         // Given
         let sceneAction = SceneAction()
         let recorder = Recorder()
@@ -105,11 +105,11 @@ class SceneActionModifierTests: XCTestCase {
         await waitUntil { recorder.received.count == 1 }
 
         // Then
-        XCTAssertEqual(recorder.received, [3])
+        #expect(recorder.received == [3])
         window.close()
     }
 
-    func testModifier_whenActionIsFiredFromOnAppear_shouldBePerformed() async throws {
+    @Test func modifier_whenActionIsFiredFromOnAppear_shouldBePerformed() async throws {
         // Given
         let sceneAction = SceneAction()
         let recorder = Recorder()
@@ -135,11 +135,11 @@ class SceneActionModifierTests: XCTestCase {
         await waitUntil { !recorder.received.isEmpty }
 
         // Then
-        XCTAssertEqual(recorder.received, [5])
+        #expect(recorder.received == [5])
         window.close()
     }
 
-    func testModifier_whenViewIsRemovedFromTheHierarchy_shouldStopReceiving() async throws {
+    @Test func modifier_whenViewIsRemovedFromTheHierarchy_shouldStopReceiving() async throws {
         // Given
         let sceneAction = SceneAction()
         let recorder = Recorder()
@@ -157,7 +157,7 @@ class SceneActionModifierTests: XCTestCase {
         try await Task.sleep(nanoseconds: 300_000_000)
 
         // Then
-        XCTAssertEqual(recorder.received, [1])
+        #expect(recorder.received == [1])
         window.close()
     }
 }

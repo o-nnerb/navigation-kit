@@ -4,33 +4,36 @@
 #if canImport(AppKit) || (canImport(UIKit) && !os(watchOS))
 import Observation
 import SwiftUI
-import XCTest
+import Testing
 
 @testable import NavigationKit
 
 /// The coordinator pattern from the README, using an `@Observable` view model: the coordinator reacts
 /// to the view model's `destination` with `onChange` instead of subscribing to a `@Published` publisher.
-@available(iOS 17.0, macOS 14.0, tvOS 17.0, visionOS 1.0, *)
 @MainActor
-class ObjectConnectionDestinationObservationTests: XCTestCase {
+@Suite struct ObjectConnectionDestinationObservationTests {
 
+    @available(iOS 17.0, macOS 14.0, tvOS 17.0, visionOS 1.0, *)
     enum Destination: Equatable {
         case error(String)
         case third(Int)
     }
 
+    @available(iOS 17.0, macOS 14.0, tvOS 17.0, visionOS 1.0, *)
     @Observable
     @MainActor
     final class ViewModel {
         var destination: Destination?
     }
 
+    @available(iOS 17.0, macOS 14.0, tvOS 17.0, visionOS 1.0, *)
     @MainActor
     private final class Recorder {
         var model: ViewModel?
         var destinations = [Destination?]()
     }
 
+    @available(iOS 17.0, macOS 14.0, tvOS 17.0, visionOS 1.0, *)
     private struct Coordinator: View {
 
         let recorder: Recorder
@@ -51,7 +54,8 @@ class ObjectConnectionDestinationObservationTests: XCTestCase {
         }
     }
 
-    func testCoordinator_whenObservableDestinationChanges_shouldReact() async throws {
+    @available(iOS 17.0, macOS 14.0, tvOS 17.0, visionOS 1.0, *)
+    @Test func coordinator_whenObservableDestinationChanges_shouldReact() async throws {
         // Given
         let recorder = Recorder()
         let window = hostInWindow(Coordinator(recorder: recorder))
@@ -65,8 +69,8 @@ class ObjectConnectionDestinationObservationTests: XCTestCase {
         await waitUntil { recorder.destinations.count == 2 }
 
         // Then
-        XCTAssertEqual(recorder.destinations, [.third(3), .error("failure")])
-        XCTAssertNotNil(window)
+        #expect(recorder.destinations == [.third(3), .error("failure")])
+        withExtendedLifetime(window) {}
     }
 }
 #endif

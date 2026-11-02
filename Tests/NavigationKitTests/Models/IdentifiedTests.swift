@@ -1,13 +1,13 @@
 // Copyright 2026 Brenno Giovanini de Moura
 // SPDX-License-Identifier: MIT
 
-import XCTest
+import Testing
 
 @testable import NavigationKit
 
-class IdentifiedTests: XCTestCase {
+@Suite struct IdentifiedTests {
 
-    func testIdentified_whenInstantiate_shouldBeItemEqualToID() {
+    @Test func identified_whenInstantiate_shouldBeItemEqualToID() {
         // Given
         let item = "Hello World"
 
@@ -15,7 +15,7 @@ class IdentifiedTests: XCTestCase {
         let sut = Identified(item: item)
 
         // Then
-        XCTAssertEqual(sut.item, item)
-        XCTAssertEqual(sut.id, item.hashValue)
+        #expect(sut.item == item)
+        #expect(sut.id == item.hashValue)
     }
 }

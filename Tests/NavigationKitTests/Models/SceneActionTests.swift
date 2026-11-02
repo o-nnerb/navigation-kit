@@ -2,14 +2,14 @@
 // SPDX-License-Identifier: MIT
 
 import SwiftAsyncStream
-import XCTest
+import Testing
 
 @testable import NavigationKit
 
 @MainActor
-class SceneActionTests: XCTestCase {
+@Suite struct SceneActionTests {
 
-    func testSceneAction_whenIntegerRegister_shouldBeValid() async throws {
+    @Test func sceneAction_whenIntegerRegister_shouldBeValid() async throws {
         // Given
         let sceneAction = SceneAction()
         let value = 1
@@ -20,10 +20,10 @@ class SceneActionTests: XCTestCase {
 
         // Then
         let received = await iterator.next()
-        XCTAssertEqual(received, value)
+        #expect(received == value)
     }
 
-    func testSceneAction_whenIntegerRegisterTwoTimes_shouldBeValid() async throws {
+    @Test func sceneAction_whenIntegerRegisterTwoTimes_shouldBeValid() async throws {
         // Given
         let sceneAction = SceneAction()
         let value = 1
@@ -35,10 +35,10 @@ class SceneActionTests: XCTestCase {
 
         // Then
         let received = [await first.next(), await second.next()]
-        XCTAssertEqual(received, [value, value])
+        #expect(received == [value, value])
     }
 
-    func testSceneAction_whenPerformedBeforeSubscription_shouldNotReplay() async throws {
+    @Test func sceneAction_whenPerformedBeforeSubscription_shouldNotReplay() async throws {
         // Given
         let sceneAction = SceneAction()
         sceneAction(1)
@@ -49,10 +49,10 @@ class SceneActionTests: XCTestCase {
 
         // Then
         let received = await iterator.next()
-        XCTAssertEqual(received, 2)
+        #expect(received == 2)
     }
 
-    func testSceneAction_whenDifferentTypes_shouldOnlyDeliverMatchingType() async throws {
+    @Test func sceneAction_whenDifferentTypes_shouldOnlyDeliverMatchingType() async throws {
         // Given
         let sceneAction = SceneAction()
 
@@ -63,10 +63,10 @@ class SceneActionTests: XCTestCase {
 
         // Then
         let received = await integers.next()
-        XCTAssertEqual(received, 7)
+        #expect(received == 7)
     }
 
-    func testSceneAction_whenDifferentScenes_shouldBeIsolated() async throws {
+    @Test func sceneAction_whenDifferentScenes_shouldBeIsolated() async throws {
         // Given
         let first = SceneAction()
         let second = SceneAction()
@@ -78,10 +78,10 @@ class SceneActionTests: XCTestCase {
 
         // Then
         let received = await iterator.next()
-        XCTAssertEqual(received, 2)
+        #expect(received == 2)
     }
 
-    func testSceneAction_whenCopied_shouldShareIdentityAndSubscribers() async throws {
+    @Test func sceneAction_whenCopied_shouldShareIdentityAndSubscribers() async throws {
         // Given
         let sceneAction = SceneAction()
         let copy = sceneAction
@@ -91,12 +91,12 @@ class SceneActionTests: XCTestCase {
         copy(3)
 
         // Then
-        XCTAssertEqual(sceneAction.id, copy.id)
+        #expect(sceneAction.id == copy.id)
         let received = await iterator.next()
-        XCTAssertEqual(received, 3)
+        #expect(received == 3)
     }
 
-    func testSceneAction_whenIteratingTaskIsCancelled_shouldFinishSequence() async throws {
+    @Test func sceneAction_whenIteratingTaskIsCancelled_shouldFinishSequence() async throws {
         // Given
         let sceneAction = SceneAction()
         let sequence = sceneAction.values(for: Int.self)
@@ -114,10 +114,10 @@ class SceneActionTests: XCTestCase {
 
         // Then
         let received = await task.value
-        XCTAssertTrue(received.isEmpty)
+        #expect(received.isEmpty)
     }
 
-    func testSceneAction_whenActionIsNotSendable_shouldStillBeDelivered() async throws {
+    @Test func sceneAction_whenActionIsNotSendable_shouldStillBeDelivered() async throws {
         // Given
         final class Reference: Hashable {
             static func == (_ lhs: Reference, _ rhs: Reference) -> Bool { lhs === rhs }
@@ -133,6 +133,6 @@ class SceneActionTests: XCTestCase {
 
         // Then
         let received = await iterator.next()
-        XCTAssertTrue(received === action)
+        #expect(received === action)
     }
 }
