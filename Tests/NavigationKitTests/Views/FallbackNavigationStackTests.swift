@@ -1,7 +1,7 @@
 // Copyright 2026 Brenno Giovanini de Moura
 // SPDX-License-Identifier: MIT
 
-#if canImport(AppKit) || (canImport(UIKit) && !os(watchOS))
+#if os(iOS) || os(tvOS) || os(macOS)
 import SwiftUI
 import XCTest
 
