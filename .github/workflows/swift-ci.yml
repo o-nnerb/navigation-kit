@@ -1,4 +1,4 @@
-name: CI
+name: swift-ci
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
       - 'Sources/**'
       - 'Tests/**'
       - '.swift-format'
-      - '.github/workflows/ci.yml'
+      - '.github/workflows/swift-ci.yml'
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
     branches: [main]
@@ -17,7 +17,7 @@ on:
       - 'Sources/**'
       - 'Tests/**'
       - '.swift-format'
-      - '.github/workflows/ci.yml'
+      - '.github/workflows/swift-ci.yml'
   workflow_dispatch: {}
 
 # Cancel any in-progress or queued run for the same ref when a new run is
