@@ -14,7 +14,7 @@ let package = Package(
     ],
     dependencies: [
         // swift-async-stream 3.x requires a Swift 6.4 toolchain, like this package.
-        .package(url: "https://github.com/o-nnerb/swift-async-stream.git", from: "3.0.0")
+        .package(url: "https://github.com/o-nnerb/swift-async-stream.git", from: "3.0.1")
     ],
     targets: [
         .target(
