@@ -28,6 +28,24 @@ class SceneActionModifierTests: XCTestCase {
         }
     }
 
+    private struct OnAppearHost: View {
+
+        let recorder: Recorder
+
+        @Environment(\.sceneAction) var sceneAction
+
+        var body: some View {
+            Color.clear
+                .frame(width: 10, height: 10)
+                .onAppear {
+                    sceneAction(5)
+                }
+                .sceneAction(for: Int.self) {
+                    recorder.received.append($0)
+                }
+        }
+    }
+
     private func makeWindow(
         sceneAction: SceneAction,
         recorder: Recorder
@@ -88,6 +106,36 @@ class SceneActionModifierTests: XCTestCase {
 
         // Then
         XCTAssertEqual(recorder.received, [3])
+        window.close()
+    }
+
+    func testModifier_whenActionIsFiredFromOnAppear_shouldBePerformed() async throws {
+        // Given
+        let sceneAction = SceneAction()
+        let recorder = Recorder()
+        _ = NSApplication.shared
+
+        // When
+        let hosting = NSHostingView(
+            rootView: OnAppearHost(recorder: recorder).environment(\.sceneAction, sceneAction)
+        )
+
+        let window = NSWindow(
+            contentRect: .init(x: 0, y: 0, width: 100, height: 100),
+            styleMask: [.titled],
+            backing: .buffered,
+            defer: false
+        )
+
+        window.isReleasedWhenClosed = false
+        window.contentView = hosting
+        window.orderBack(nil)
+        hosting.layoutSubtreeIfNeeded()
+
+        await waitUntil { !recorder.received.isEmpty }
+
+        // Then
+        XCTAssertEqual(recorder.received, [5])
         window.close()
     }
 }

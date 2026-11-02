@@ -1,4 +1,4 @@
-// swift-tools-version: 6.3
+// swift-tools-version: 6.4
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -13,8 +13,8 @@ let package = Package(
         )
     ],
     dependencies: [
-        // 2.1.4 supports Swift 6.2/6.3 toolchains, 3.x requires Swift 6.4. The API used here is identical in both.
-        .package(url: "https://github.com/o-nnerb/swift-async-stream.git", "2.1.4"..<"4.0.0")
+        // swift-async-stream 3.x requires a Swift 6.4 toolchain, like this package.
+        .package(url: "https://github.com/o-nnerb/swift-async-stream.git", from: "3.0.0")
     ],
     targets: [
         .target(

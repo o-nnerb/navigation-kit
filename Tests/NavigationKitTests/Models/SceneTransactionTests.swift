@@ -1,20 +1,12 @@
 // Copyright 2026 Brenno Giovanini de Moura
 // SPDX-License-Identifier: MIT
 
-import Combine
 import XCTest
 
 @testable import NavigationKit
 
 @MainActor
 class SceneTransactionTests: XCTestCase {
-
-    var cancellations = [AnyCancellable]()
-
-    override func tearDown() async throws {
-        try await super.tearDown()
-        cancellations = []
-    }
 
     func testSceneTransaction_whenTwoFired_shouldTransactionToTwoElements() async throws {
         // Given
@@ -96,46 +88,23 @@ class SceneTransactionTests: XCTestCase {
         XCTAssertTrue(received.isEmpty)
     }
 
-    // MARK: - Deprecated
-
-    @available(*, deprecated, message: "Covers the deprecated Combine `publisher` until it is removed.")
-    func testSceneTransaction_whenUsingDeprecatedPublisher_shouldStillEmit() throws {
-        // Given
-        let expectation = expectation(description: "scene.transaction")
-        var values = [Int]()
-
-        expectation.expectedFulfillmentCount = 2
-
-        // When
-        let sut = SceneTransaction<Int>()
-        sut.publisher.sink {
-            values.append($0)
-            expectation.fulfill()
-        }.store(in: &cancellations)
-
-        sut(1)
-        sut(2)
-
-        // Then
-        waitForExpectations(timeout: 15)
-        XCTAssertEqual(values, [1, 2])
-    }
-
-    @available(*, deprecated, message: "Covers the deprecated Combine `publisher` until it is removed.")
-    func testSceneTransaction_whenFired_shouldReachPublisherAndValues() async throws {
+    func testSceneTransaction_whenFiredFromAnotherTask_shouldBeObservedByAnotherTask() async throws {
         // Given
         let sut = SceneTransaction<Int>()
-        var published = [Int]()
-
-        // When
-        sut.publisher.sink { published.append($0) }.store(in: &cancellations)
         let iterator = sut.values.makeAsyncIterator()
 
-        sut(9)
+        // When
+        let task = Task { () -> [Int?] in
+            [await iterator.next(), await iterator.next()]
+        }
+
+        await Task.detached {
+            sut(1)
+            sut(2)
+        }.value
 
         // Then
-        let value = await iterator.next()
-        XCTAssertEqual(value, 9)
-        XCTAssertEqual(published, [9])
+        let received = await task.value
+        XCTAssertEqual(received, [1, 2])
     }
 }
