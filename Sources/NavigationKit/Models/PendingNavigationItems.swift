@@ -1,7 +1,6 @@
 // Copyright 2026 Brenno Giovanini de Moura
 // SPDX-License-Identifier: MIT
 
-import Combine
 import SwiftUI
 
 struct PendingNavigationItems: Hashable {

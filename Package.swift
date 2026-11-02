@@ -12,10 +12,16 @@ let package = Package(
             targets: ["NavigationKit"]
         )
     ],
+    dependencies: [
+        // 2.1.4 supports Swift 6.2/6.3 toolchains, 3.x requires Swift 6.4. The API used here is identical in both.
+        .package(url: "https://github.com/o-nnerb/swift-async-stream.git", "2.1.4"..<"4.0.0")
+    ],
     targets: [
         .target(
             name: "NavigationKit",
-            dependencies: []
+            dependencies: [
+                .product(name: "SwiftAsyncStream", package: "swift-async-stream")
+            ]
         ),
         .testTarget(
             name: "NavigationKitTests",

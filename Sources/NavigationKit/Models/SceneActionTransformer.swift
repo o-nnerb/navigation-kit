@@ -1,7 +1,6 @@
 // Copyright 2026 Brenno Giovanini de Moura
 // SPDX-License-Identifier: MIT
 
-import Combine
 import SwiftUI
 
 /// A type that transforms a scene action to a specific item.
