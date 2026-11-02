@@ -128,6 +128,7 @@ class FallbackNavigationStackTests: XCTestCase {
 
         recorder.action?.append("text")
         await waitUntil { recorder.strings == ["text"] }
+        try await Task.sleep(nanoseconds: 1_000_000_000)
 
         // Then
         XCTAssertEqual(Set(recorder.appeared), [1])
@@ -154,6 +155,24 @@ class FallbackNavigationStackTests: XCTestCase {
         // Then
         XCTAssertTrue(recorder.disappeared.contains(2))
         XCTAssertEqual(recorder.action?.count, 1)
+        XCTAssertNotNil(window)
+    }
+
+    /// The system navigation drops (and reports as dismissed) the items pushed while another push is in
+    /// progress, so the stack has to still have all of them once the pushes are done.
+    func testStack_whenSeveralItemsAreSet_shouldKeepAllOfThem() async throws {
+        // Given
+        let recorder = Recorder()
+        let window = await host(recorder)
+
+        // When
+        recorder.action?.setItems([1, 2, 3])
+        await waitUntil { recorder.appeared.contains(3) }
+        try await Task.sleep(nanoseconds: 1_000_000_000)
+
+        // Then
+        XCTAssertEqual(Set(recorder.appeared), [1, 2, 3])
+        XCTAssertEqual(recorder.action?.count, 3)
         XCTAssertNotNil(window)
     }
 
@@ -186,6 +205,8 @@ class FallbackNavigationStackTests: XCTestCase {
         // When
         let window = await host(recorder, representation: representation)
         await waitUntil { recorder.appeared.contains(2) }
+
+        try await Task.sleep(nanoseconds: 1_000_000_000)
 
         // Then
         XCTAssertEqual(Set(recorder.appeared), [1, 2])

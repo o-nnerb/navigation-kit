@@ -233,7 +233,7 @@ class FallbackNavigationStatePresentationTests: XCTestCase {
         XCTAssertEqual(state.displayedCount, 1)
     }
 
-    func testState_whenSeveralItemsAreSet_shouldDisplayAllOfThemTogether() async throws {
+    func testState_whenSeveralItemsAreSet_shouldDisplayThemOneAtATime() async throws {
         // Given
         let state = FallbackNavigationState()
 
@@ -241,6 +241,10 @@ class FallbackNavigationStatePresentationTests: XCTestCase {
         state.setItems([1, 2, 3])
 
         // Then
+        XCTAssertEqual(state.count, 3)
+        XCTAssertEqual(state.displayedCount, 1)
+
+        await waitUntil { state.displayedCount == 3 }
         XCTAssertEqual(state.displayedCount, 3)
     }
 
@@ -264,6 +268,7 @@ class FallbackNavigationStatePresentationTests: XCTestCase {
         // Given
         let state = FallbackNavigationState()
         state.setItems([1, 2, 3])
+        await waitUntil { state.displayedCount == 3 }
 
         // When
         state.removeLast()
@@ -277,6 +282,7 @@ class FallbackNavigationStatePresentationTests: XCTestCase {
         // Given
         let state = FallbackNavigationState()
         state.setItems([1, 2, 3])
+        await waitUntil { state.displayedCount == 3 }
 
         // When
         state.truncate(to: 1)

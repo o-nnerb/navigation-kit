@@ -9,14 +9,14 @@ import SwiftUI
 @MainActor
 final class FallbackNavigationState: ObservableObject {
 
-    /// How long a push takes to finish. The navigation of the system ignores a push started before
-    /// the previous one is done, so the next one waits for it.
+    /// How long a push takes to finish. The navigation of the system ignores (and reports as dismissed)
+    /// a push started before the previous one is done, so the items are shown one at a time.
     private static let transitionDuration: TimeInterval = 0.55
 
     private(set) var entries = [NavigationEntry]()
 
-    /// How many items are being shown. It follows `entries`: it goes down at once, and goes up when
-    /// no other push is in progress.
+    /// How many items are being shown. It follows `entries`: it goes down at once, and goes up one
+    /// item each time the previous push is done.
     private(set) var displayedCount = 0
 
     private var lastPendingNavigationItemsHashValue: Int?
@@ -35,8 +35,11 @@ final class FallbackNavigationState: ObservableObject {
 
         lastPendingNavigationItemsHashValue = hashValue
         entries = pendingItems?.entries ?? []
-        displayedCount = entries.count
+        displayedCount = 0
         lastPush = nil
+
+        // Called while a view is updated, which cannot publish changes: the first push is deferred.
+        reconcile(deferred: true)
     }
 
     /// Keeps the first `count` items. Used when the user navigates back.
@@ -51,10 +54,10 @@ final class FallbackNavigationState: ObservableObject {
     private func set(_ entries: [NavigationEntry]) {
         objectWillChange.send()
         self.entries = entries
-        reconcile()
+        reconcile(deferred: false)
     }
 
-    private func reconcile() {
+    private func reconcile(deferred: Bool) {
         reconciliation?.cancel()
         reconciliation = nil
 
@@ -68,26 +71,23 @@ final class FallbackNavigationState: ObservableObject {
 
         let wait = lastPush.map { Self.transitionDuration - Date().timeIntervalSince($0) } ?? 0
 
-        guard wait > 0 else {
-            push()
+        if wait <= 0 && !deferred {
+            objectWillChange.send()
+            displayedCount += 1
+            lastPush = Date()
+            reconcile(deferred: false)
             return
         }
 
         reconciliation = Task { [weak self] in
-            try? await Task.sleep(nanoseconds: UInt64(wait * 1_000_000_000))
+            try? await Task.sleep(nanoseconds: UInt64(max(wait, 0) * 1_000_000_000))
 
             guard !Task.isCancelled else {
                 return
             }
 
-            self?.reconcile()
+            self?.reconcile(deferred: false)
         }
-    }
-
-    private func push() {
-        objectWillChange.send()
-        displayedCount = entries.count
-        lastPush = Date()
     }
 
     private func index<Item: Hashable>(of item: Item) -> Int? {
