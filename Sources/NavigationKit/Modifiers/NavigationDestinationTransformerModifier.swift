@@ -50,14 +50,14 @@ extension NavigationDestinationTransformerModifier {
                     }
 
                 case .removeUntil(let item):
-                    let transformer = NavigationDestinationTransformer(.append)
+                    let transformer = NavigationDestinationTransformer(.removeUntil)
                     closure(transformer, item)
                     return perform(AnyHashable.self, with: transformer).map {
                         .removeUntil($0)
                     }
 
                 case .removeIncluding(let item):
-                    let transformer = NavigationDestinationTransformer(.append)
+                    let transformer = NavigationDestinationTransformer(.removeIncluding)
                     closure(transformer, item)
                     return perform(AnyHashable.self, with: transformer).map {
                         .removeIncluding($0)

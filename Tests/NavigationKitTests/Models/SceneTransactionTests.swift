@@ -107,4 +107,15 @@ import Testing
         let received = await task.value
         #expect(received == [1, 2])
     }
+
+    @Test func sceneTransaction_whenHashed_shouldFollowTheEquality() {
+        // Given
+        let sut = SceneTransaction<Int>()
+        let copy = sut
+        let other = SceneTransaction<Int>()
+
+        // Then
+        #expect(sut.hashValue == copy.hashValue)
+        #expect(Set([sut, copy, other]).count == 2)
+    }
 }
