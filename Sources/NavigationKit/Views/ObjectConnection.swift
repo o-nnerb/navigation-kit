@@ -3,10 +3,16 @@
 
 import SwiftUI
 
-/// An object connection that takes an input value, an object, and a content view to display.
+/// Creates the object behind a screen, usually its view model, and keeps it for as long as the input
+/// stays the same.
 ///
-/// This connection automatically handles the creation, update, and disposal of the object based
-/// on changes to the input value.
+/// A view is a value that SwiftUI creates again whenever its parent is evaluated, so the object cannot be
+/// stored in the view. A `@StateObject` keeps the object from the first time and ignores later changes
+/// to the input of the view. `ObjectConnection` creates the object from the input, keeps it while the
+/// input is equal to the previous one, and creates a new object when the input changes.
+///
+/// The object does not need to be an `ObservableObject`. An `@Observable` type works as well, and
+/// the content is rendered again when the properties it reads change.
 ///
 /// ```swift
 /// struct UserCoordinator: View {
@@ -21,6 +27,10 @@ import SwiftUI
 ///     }
 /// }
 /// ```
+///
+/// The closure that creates the object runs on the main actor, once per input.
+///
+/// See <doc:Coordinators> for how to combine it with the navigation.
 @MainActor
 public struct ObjectConnection<Input, Content, ViewModel>: View where Input: Hashable, Content: View {
 
@@ -64,6 +74,7 @@ public struct ObjectConnection<Input, Content, ViewModel>: View where Input: Has
         )
     }
 
+    /// The content built with the object of the current input.
     @ViewBuilder
     public var body: some View {
         content(state.resolveInTheFly(input, viewModel))

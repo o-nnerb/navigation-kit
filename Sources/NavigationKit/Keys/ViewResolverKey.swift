@@ -19,7 +19,20 @@ extension EnvironmentValues {
         set { self[ViewResolverKey.self] = newValue }
     }
 
-    /// The view resolver associated with the environment.
+    /// Builds the view registered for a model with ``SwiftUICore/View/viewResolver(for:_:)``.
+    ///
+    /// Reading it from a view that has no `viewResolver(for:_:)` above it stops the program, and so
+    /// does resolving a model whose type was never registered.
+    ///
+    /// ```swift
+    /// struct Root: View {
+    ///     @Environment(\.viewResolver) private var viewResolver
+    ///
+    ///     var body: some View {
+    ///         viewResolver(ProfileScene())
+    ///     }
+    /// }
+    /// ```
     public var viewResolver: ViewResolver {
         guard let _viewResolver else {
             fatalError()
@@ -33,9 +46,19 @@ extension View {
 
     /// Associates a view with a specific type of item.
     ///
-    /// Use this method to associate a view with a specific type of item. When the view
-    /// resolver encounters an item of the specified type, it calls the provided closure to
-    /// create a view for the item.
+    /// When a view below this one resolves an item of that type through
+    /// ``SwiftUICore/EnvironmentValues/viewResolver``, the closure builds the view that is shown.
+    /// The caller only knows the model, so the view that is shown can change without touching it.
+    ///
+    /// ```swift
+    /// ContentView()
+    ///     .viewResolver(for: ProfileScene.self) {
+    ///         ProfileCoordinator($0)
+    ///     }
+    /// ```
+    ///
+    /// The view built by the closure sees the same `viewResolver`, ``SwiftUICore/EnvironmentValues/sceneAction``
+    /// and ``SwiftUICore/EnvironmentValues/navigationAction`` as the view that resolved it.
     ///
     /// - Parameters:
     ///    - type: The type of item to associate with the view.

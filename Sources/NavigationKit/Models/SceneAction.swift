@@ -4,25 +4,42 @@
 import SwiftAsyncStream
 import SwiftUI
 
-/// A type that represents an action that can be performed on a scene.
+/// Sends an action, any `Hashable` value, to the views of a scene that handle its type.
 ///
-/// You can use this type to define custom actions that can be triggered on a scene. It takes a generic
-/// `Action` parameter that conforms to the `Hashable` protocol.
+/// Get one from the `sceneAction` environment value and call it with the action. Whoever sends
+/// does not know who handles it, and the handlers are registered with
+/// ``SwiftUICore/View/sceneAction(for:perform:)``:
 ///
-/// You can then call the `callAsFunction` method on an instance of `SceneAction` with an
-/// argument of type `Action` to perform the corresponding action available in the scene.
+/// ```swift
+/// enum SessionAction: Hashable {
+///     case logout
+/// }
+///
+/// struct SettingsView: View {
+///     @Environment(\.sceneAction) private var sceneAction
+///
+///     var body: some View {
+///         Button("Log out") {
+///             sceneAction(SessionAction.logout)
+///         }
+///     }
+/// }
+/// ```
+///
+/// The scene is created by ``SwiftUICore/View/sceneActionEnabled()``. An action is delivered to the
+/// handlers that exist when it is sent, so a handler that is not in the hierarchy yet does not
+/// receive it later.
 public struct SceneAction: Sendable {
 
     private let registry = Registry()
 
     init() {}
 
-    /// Perform the action associated with this `SceneAction`.
+    /// Sends the action to every handler of its type in the scene.
     ///
-    /// Call this method with an argument of type `Action` to perform the corresponding
-    /// action on the scene.
+    /// Nothing happens when there is no handler for the type.
     ///
-    /// - Parameter action: The action to perform on the scene.
+    /// - Parameter action: The action to send.
     public func callAsFunction<Action: Hashable>(_ action: Action) {
         registry.broadcast(for: Action.self, createIfNeeded: false)?.send(action)
     }

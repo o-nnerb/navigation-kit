@@ -3,9 +3,12 @@
 
 import SwiftUI
 
-/// A type representing an action that modifies the navigation stack.
+/// Changes the items of the navigation stack the view belongs to.
 ///
-/// You can use this type to add, remove, or manipulate items in the navigation stack of a view.
+/// It takes the place of the `NavigationPath` binding: instead of owning the path, the views ask
+/// the stack to push or pop. Get it from the `navigationAction` environment value, which is set by
+/// ``NKNavigationStack`` and ``NKNavigationSplitView``. Each item pushed is shown by the view
+/// registered for its type with ``SwiftUICore/View/nkNavigationDestination(for:destination:)``.
 ///
 /// ```swift
 /// struct MainView: View {
@@ -18,6 +21,9 @@ import SwiftUI
 ///     }
 /// }
 /// ```
+///
+/// Items need to be `Hashable`. The ones that are also `Codable` can be saved with ``codable`` and
+/// restored through the initializer of ``NKNavigationStack``.
 @MainActor
 public struct NavigationAction {
 
@@ -39,7 +45,10 @@ public struct NavigationAction {
 
 extension NavigationAction {
 
-    /// Sets the items in the navigation stack to the specified array of items.
+    /// Replaces the whole stack with the items, the last one being the one on top.
+    ///
+    /// Before iOS 16, tvOS 16 and macOS 13 the items are pushed one at a time, each after the previous
+    /// transition finishes.
     ///
     /// - Parameter items: The items to set in the navigation stack.
     public func setItems<Item: Hashable & Sendable>(_ items: [Item]) {
@@ -50,7 +59,10 @@ extension NavigationAction {
         state.setItems(items)
     }
 
-    /// Sets the items in the navigation stack to the specified array of `Codable` items.
+    /// Replaces the whole stack with the `Codable` items, the last one being the one on top.
+    ///
+    /// Use this overload for items that must survive ``codable``. A stack that contains an item that
+    /// is not `Codable` has no representation.
     ///
     /// - Parameter items: The items to set in the navigation stack.
     public func setItems<Item: Hashable & Codable & Sendable>(_ items: [Item]) {
@@ -61,7 +73,7 @@ extension NavigationAction {
         state.setItems(items)
     }
 
-    /// Appends the specified item to the end of the navigation stack.
+    /// Pushes the item on top of the stack.
     ///
     /// - Parameter item: The item to append.
     public func append<Item: Hashable & Sendable>(_ item: Item) {
@@ -72,7 +84,9 @@ extension NavigationAction {
         state.append(item)
     }
 
-    /// Appends the specified `Codable` item to the end of the navigation stack.
+    /// Pushes the `Codable` item on top of the stack.
+    ///
+    /// Use this overload for items that must survive ``codable``.
     ///
     /// - Parameter item: The item to append.
     public func append<Item: Hashable & Codable & Sendable>(_ item: Item) {
@@ -83,7 +97,9 @@ extension NavigationAction {
         state.append(item)
     }
 
-    /// Removes all instances of the specified item and all items after it from the navigation stack.
+    /// Pops back to the screen before the item: the item and everything pushed after it are removed.
+    ///
+    /// Nothing happens when the item is not in the stack.
     ///
     /// - Parameter item: The item to remove.
     public func removeIncluding<Item: Hashable & Sendable>(_ item: Item) {
@@ -94,9 +110,11 @@ extension NavigationAction {
         state.removeIncluding(item)
     }
 
-    /// Removes all items in the navigation stack before the specified item.
+    /// Pops back to the item: everything pushed after it is removed and the item stays on top.
     ///
-    /// - Parameter item: The item to remove until.
+    /// Nothing happens when the item is not in the stack.
+    ///
+    /// - Parameter item: The item to go back to.
     public func removeUntil<Item: Hashable & Sendable>(_ item: Item) {
         if performIfNeeded(for: .removeUntil(item)) != nil {
             return
@@ -105,7 +123,9 @@ extension NavigationAction {
         state.removeUntil(item)
     }
 
-    /// Removes a specific item in the navigation stack.
+    /// Removes the item from the middle of the stack, keeping the others in order.
+    ///
+    /// Nothing happens when the item is not in the stack.
     ///
     /// - Parameter item: The item to remove.
     public func remove<Item: Hashable & Sendable>(_ item: Item) {
@@ -126,7 +146,7 @@ extension NavigationAction {
         state.removeLast()
     }
 
-    /// Removes the last k items from the navigation stack.
+    /// Removes the `k` items on top of the stack.
     ///
     /// - Parameter k: The number of items to remove.
     public func removeLast(_ k: Int) {
@@ -139,10 +159,16 @@ extension NavigationAction {
     }
 
     /// A value that describes the contents of this path in a serializable format.
+    ///
+    /// It is `nil` when an item in the stack is not `Codable`. Encode the value, for example with
+    /// `JSONEncoder`, and pass it back to ``NKNavigationStack`` to restore the stack.
     public var codable: CodableRepresentation? {
         state.codable
     }
 
+    /// Returns whether the item is in the stack.
+    ///
+    /// - Parameter item: The item to look for.
     public func contains<Item: Hashable & Sendable>(_ item: Item) -> Bool {
         guard case .contains(let item)? = performIfNeeded(for: .contains(item)) else {
             return state.contains(item)

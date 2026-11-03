@@ -12,8 +12,20 @@ import SwiftUI
 /// `navigationAction` environment value to a `NavigationAction` object that provides a way for
 /// child views to push new views onto the stack.
 ///
-/// Map the items to their views with ``SwiftUI/View/nkNavigationDestination(for:destination:)``,
+/// Map the items to their views with ``SwiftUICore/View/nkNavigationDestination(for:destination:)``,
 /// which works on every supported OS version.
+///
+/// ```swift
+/// NKNavigationStack {
+///     HomeView()
+///         .nkNavigationDestination(for: ProfileScene.self) {
+///             ProfileView($0)
+///         }
+/// }
+/// ```
+///
+/// The views inside push and pop through ``SwiftUICore/EnvironmentValues/navigationAction``. See
+/// <doc:NavigationStacks> for the rest of the operations.
 public struct NKNavigationStack<Content: View>: View {
 
     @StateObject var storage = NavigationStateStorage()
@@ -32,6 +44,8 @@ public struct NKNavigationStack<Content: View>: View {
     /// Initializes a new instance of the navigation stack with the provided sequence
     /// of items and content.
     ///
+    /// The items are already stacked when the content appears, the last one being on top.
+    ///
     /// - Parameters:
     ///    - sequence: The sequence of items to add to the stack.
     ///    - content: The content view.
@@ -46,6 +60,9 @@ public struct NKNavigationStack<Content: View>: View {
     /// Initializes a new instance of the navigation stack with the provided stack
     /// representation and content.
     ///
+    /// Use it to restore a stack saved from ``NavigationAction/codable``. A `nil` representation starts
+    /// the stack empty.
+    ///
     /// - Parameters:
     ///    - representation: The stack codable representation.
     ///    - content: The content view.
@@ -57,6 +74,7 @@ public struct NKNavigationStack<Content: View>: View {
         self.content = content()
     }
 
+    /// The content of the stack.
     public var body: some View {
         _NavigationStackHost(
             storage: storage,

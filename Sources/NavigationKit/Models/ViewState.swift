@@ -3,8 +3,15 @@
 
 import Foundation
 
-/// A state that represents whether a view is active or inactive.
+/// Whether a view is on screen, as tracked by ``SwiftUICore/View/viewState(_:)``.
+///
+/// A view model can keep a `ViewState` property to start loading data when its view appears and to
+/// stop when it disappears, without depending on SwiftUI.
 public enum ViewState {
+
+    /// The view appeared.
     case active
+
+    /// The view disappeared. It is also the value to start from, before the view appears.
     case inactive
 }

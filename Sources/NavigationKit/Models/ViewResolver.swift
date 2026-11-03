@@ -3,7 +3,20 @@
 
 import SwiftUI
 
-/// A type that resolves an item to a view.
+/// Turns a model into the view registered for its type.
+///
+/// Get one from the `viewResolver` environment value and call it with the model. The views are
+/// registered with ``SwiftUICore/View/viewResolver(for:_:)``.
+///
+/// ```swift
+/// struct Root: View {
+///     @Environment(\.viewResolver) private var viewResolver
+///
+///     var body: some View {
+///         viewResolver(ProfileScene())
+///     }
+/// }
+/// ```
 public struct ViewResolver: Sendable {
 
     private let _viewResolver: _ViewResolver
@@ -12,7 +25,9 @@ public struct ViewResolver: Sendable {
         self._viewResolver = _viewResolver
     }
 
-    /// Returns a view for the specified item.
+    /// Returns the view registered for the type of the item.
+    ///
+    /// Stops the program when no view was registered for that type.
     ///
     /// - Parameter item: The item to resolve.
     ///

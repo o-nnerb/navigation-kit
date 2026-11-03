@@ -91,35 +91,26 @@ extension NavigationDestinationTransformerModifier {
 
 extension View {
 
-    /// A modifier that configures a navigation destination transformer for a specific type of `Item`.
+    /// Replaces the items of one type with the items of another type before they reach the stack.
     ///
-    /// This modifier can be used when you have a `UserView` that is associated with a `UserModel`
-    /// using `navigationDestination(for:destination:)`, but the type specified in the
-    /// `NavigationAction` is an `enum UserState` that contains a `case model(UserModel)`.
-    ///
-    /// Using the `navigationDestinationTransformer(for:closure:)` method, you can transform
-    /// the `UserState` into a `UserModel`. This method allows you to provide a closure that takes a
-    /// `NavigationDestinationTransformer` and an `Item` (in this case, a `UserState`),
-    /// and returns `Void`.
-    ///
-    /// Within this closure, you can extract the `UserModel` from the `UserState` and pass it to the
-    /// `NavigationDestinationTransformer`, which will then perform the action with the `UserModel`
-    /// which will call the `UserView` defined at `navigationDestination(for:destination:)`.
-    ///
-    /// Example usage:
+    /// Use it when a destination is registered for a model, say `UserModel`, with
+    /// ``SwiftUICore/View/nkNavigationDestination(for:destination:)``, but the code that navigates only
+    /// knows a wider type, such as `enum UserScene { case model(UserModel) }`. Every
+    /// ``NavigationAction`` below this view that receives a `UserScene` calls the closure, and the item
+    /// given to the transformer is what ends up in the stack.
     ///
     /// ```swift
-    /// navigationDestinationTransformer(for: UserState.self) { transformer, scene in
+    /// .navigationDestinationTransformer(for: UserScene.self) { transformer, scene in
     ///     switch scene {
     ///     case .model(let userModel):
     ///         transformer(userModel)
-    ///     default:
-    ///         // The NavigationAction will be ignored and the
-    ///         // current app navigation state unchanged
-    ///         break
     ///     }
     /// }
     /// ```
+    ///
+    /// The transformer is applied to `append(_:)`, `setItems(_:)`, `remove(_:)`, `removeIncluding(_:)`,
+    /// `removeUntil(_:)` and `contains(_:)`. When the closure does not call the transformer for an
+    /// item, that item is used as it came, so it needs a destination of its own.
     ///
     /// - Parameters:
     ///    - itemType: The type of item associated with the transformer.

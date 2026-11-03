@@ -20,16 +20,31 @@ private struct SceneActionTransformerModifier<Action: Hashable>: ViewModifier {
 
 extension View {
 
-    /// Transforms a specific action type to any action type using the transformer. The new action type is used
-    /// to perform an action in the scene.
+    /// Sends another action in response to an action of the given type.
+    ///
+    /// It is the way to translate an action meant for the whole app into the action of the module
+    /// that handles it, so the module does not need to know where the action comes from:
+    ///
+    /// ```swift
+    /// .sceneActionTransformer(for: AppAction.self) { transformer, action in
+    ///     switch action {
+    ///     case .error(let failure):
+    ///         transformer(AlertAction.show(failure))
+    ///     default:
+    ///         break
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// The original action is not consumed. Its other handlers still receive it, along with the
+    /// one sent by the transformer.
     ///
     /// - Parameters:
-    ///    - actionType: The action type to map from.
-    ///    - closure: The closure that accepts a `SceneActionTransformer` instance
-    /// and an item of the specified type. You can use the provided transformer to customize the
-    /// scene action associated with the item.
+    ///    - actionType: The type of the action to translate.
+    ///    - closure: Receives the action and a ``SceneActionTransformer``. Call the transformer with the
+    /// action to send, or do not call it to send nothing.
     ///
-    /// - Returns: A modified `View` that performs the scene action using the new action type.
+    /// - Returns: A view that sends the translated actions.
     public func sceneActionTransformer<Action: Hashable>(
         for actionType: Action.Type,
         _ closure: @escaping (SceneActionTransformer, Action) -> Void

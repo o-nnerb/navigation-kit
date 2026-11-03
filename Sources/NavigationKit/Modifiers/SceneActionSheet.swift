@@ -52,13 +52,23 @@ extension SceneActionSheet {
 @MainActor
 extension View {
 
-    /// Presents an action sheet for a given action type, and maps the selected action to a scene.
+    /// Presents a sheet when an action of the given type is sent on the scene.
+    ///
+    /// The content of the sheet is the view registered with ``SwiftUICore/View/viewResolver(for:_:)`` for the
+    /// type of the scene that `reducer` returns. The sheet is a SwiftUI `sheet`, not an `ActionSheet`.
+    ///
+    /// ```swift
+    /// ContentView()
+    ///     .sceneActionSheet(for: SettingsAction.self) { action in
+    ///         SettingsScene(section: action.section)
+    ///     }
+    /// ```
     ///
     /// - Parameters:
-    ///    - actionType: A type of action that will be presented in the action sheet.
-    ///    - reducer: A closure that maps the selected action to a scene.
+    ///    - actionType: The type of the action that presents the sheet.
+    ///    - reducer: Maps the action to the model of the view to present.
     ///
-    /// - Returns: A new view that presents an action sheet.
+    /// - Returns: A view that presents a sheet for each action.
     public func sceneActionSheet<Action: Hashable, Scene: Hashable>(
         for actionType: Action.Type,
         reducer: @escaping (Action) -> Scene
@@ -66,11 +76,14 @@ extension View {
         modifier(SceneActionSheet(reducer: reducer))
     }
 
-    /// Presents an action sheet for a given action type.
+    /// Presents a sheet when an action of the given type is sent on the scene.
     ///
-    /// - Parameter actionType: A type of action that will be presented in the action sheet.
+    /// The action itself is the model resolved with ``SwiftUICore/View/viewResolver(for:_:)``, so a view must
+    /// be registered for the action type.
     ///
-    /// - Returns: A new view that presents an action sheet.
+    /// - Parameter actionType: The type of the action that presents the sheet.
+    ///
+    /// - Returns: A view that presents a sheet for each action.
     public func sceneActionSheet<Action: Hashable>(
         for actionType: Action.Type
     ) -> some View {

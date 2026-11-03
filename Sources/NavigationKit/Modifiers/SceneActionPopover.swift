@@ -70,15 +70,18 @@ extension SceneActionPopover {
 @MainActor
 extension View {
 
-    /// Presents a popover view in response to a certain action.
+    /// Presents a popover when an action of the given type is sent on the scene.
+    ///
+    /// Not available on tvOS and watchOS. The content of the popover is the view registered with
+    /// ``SwiftUICore/View/viewResolver(for:_:)`` for the type of the scene that `reducer` returns.
     ///
     /// - Parameters:
-    ///    - actionType: The type of action that will trigger the popover view.
-    ///    - attachmentAnchor: The anchor to which the popover view is attached.
+    ///    - actionType: The type of the action that presents the popover.
+    ///    - attachmentAnchor: The anchor to which the popover is attached.
     ///    - arrowEdge: The edge on which the popover's arrow is placed.
-    ///    - reducer: A function that takes the action as input and returns a hashable scene identifier.
+    ///    - reducer: Maps the action to the model of the view to present.
     ///
-    /// - Returns: A modified version of the view that presents a popover view when the action is triggered.
+    /// - Returns: A view that presents a popover for each action.
     public func sceneActionPopover<Action: Hashable, Scene: Hashable>(
         for actionType: Action.Type,
         attachmentAnchor: PopoverAttachmentAnchor = .rect(.bounds),
@@ -94,14 +97,17 @@ extension View {
         )
     }
 
-    /// Presents a popover view in response to a certain action.
+    /// Presents a popover when an action of the given type is sent on the scene.
+    ///
+    /// The action itself is the model resolved with ``SwiftUICore/View/viewResolver(for:_:)``, so a view must
+    /// be registered for the action type.
     ///
     /// - Parameters:
-    ///    - actionType: The type of action that will trigger the popover view.
-    ///    - attachmentAnchor: The anchor to which the popover view is attached.
+    ///    - actionType: The type of the action that presents the popover.
+    ///    - attachmentAnchor: The anchor to which the popover is attached.
     ///    - arrowEdge: The edge on which the popover's arrow is placed.
     ///
-    /// - Returns: A modified version of the view that presents a popover view when the action is triggered.
+    /// - Returns: A view that presents a popover for each action.
     public func sceneActionPopover<Action: Hashable>(
         for actionType: Action.Type,
         attachmentAnchor: PopoverAttachmentAnchor = .rect(.bounds),

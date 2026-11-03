@@ -3,7 +3,15 @@
 
 import Foundation
 
-/// A closure that takes an input of type `Input` and produces an output of type `Output`.
+/// A closure that can be compared and hashed, so it can be part of a `Hashable` model.
+///
+/// Swift closures are not `Equatable`. A model that carries a callback, such as the scene of a screen
+/// that reports a result back to the screen that opened it, can hold a `Closure` and still be used as a
+/// navigation item. Two values are equal only if one is a copy of the other. Two closures created from
+/// the same code are different.
+///
+/// The input is a single value of type `Input`. For a closure with several parameters, make `Input` a
+/// tuple and call it with the arguments directly, up to eight.
 ///
 /// Usage:
 ///
@@ -46,6 +54,9 @@ extension Closure where Input == Void {
 // swiftlint:disable identifier_name function_parameter_count
 extension Closure {
 
+    /// Calls the closure with two arguments, which make its tuple input.
+    ///
+    /// - Returns: The output value produced by the closure.
     public func callAsFunction<P0, P1>(
         _ p0: P0,
         _ p1: P1
@@ -53,6 +64,9 @@ extension Closure {
         closure((p0, p1))
     }
 
+    /// Calls the closure with three arguments, which make its tuple input.
+    ///
+    /// - Returns: The output value produced by the closure.
     public func callAsFunction<P0, P1, P2>(
         _ p0: P0,
         _ p1: P1,
@@ -61,6 +75,9 @@ extension Closure {
         closure((p0, p1, p2))
     }
 
+    /// Calls the closure with four arguments, which make its tuple input.
+    ///
+    /// - Returns: The output value produced by the closure.
     public func callAsFunction<P0, P1, P2, P3>(
         _ p0: P0,
         _ p1: P1,
@@ -70,6 +87,9 @@ extension Closure {
         closure((p0, p1, p2, p3))
     }
 
+    /// Calls the closure with five arguments, which make its tuple input.
+    ///
+    /// - Returns: The output value produced by the closure.
     public func callAsFunction<P0, P1, P2, P3, P4>(
         _ p0: P0,
         _ p1: P1,
@@ -80,6 +100,9 @@ extension Closure {
         closure((p0, p1, p2, p3, p4))
     }
 
+    /// Calls the closure with six arguments, which make its tuple input.
+    ///
+    /// - Returns: The output value produced by the closure.
     public func callAsFunction<P0, P1, P2, P3, P4, P5>(
         _ p0: P0,
         _ p1: P1,
@@ -91,6 +114,9 @@ extension Closure {
         closure((p0, p1, p2, p3, p4, p5))
     }
 
+    /// Calls the closure with seven arguments, which make its tuple input.
+    ///
+    /// - Returns: The output value produced by the closure.
     public func callAsFunction<P0, P1, P2, P3, P4, P5, P6>(
         _ p0: P0,
         _ p1: P1,
@@ -103,6 +129,9 @@ extension Closure {
         closure((p0, p1, p2, p3, p4, p5, p6))
     }
 
+    /// Calls the closure with eight arguments, which make its tuple input.
+    ///
+    /// - Returns: The output value produced by the closure.
     public func callAsFunction<P0, P1, P2, P3, P4, P5, P6, P7>(
         _ p0: P0,
         _ p1: P1,
@@ -140,6 +169,11 @@ extension Closure: Hashable {
 
 extension Closure {
 
+    /// Creates a closure from the given one.
+    ///
+    /// Every call creates a different value, even when the closure is the same.
+    ///
+    /// - Parameter closure: The closure to wrap.
     public static func closure(_ closure: @escaping (Input) -> Output) -> Self {
         .init(closure)
     }

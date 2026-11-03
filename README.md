@@ -342,6 +342,13 @@ The `viewState(_:)` modifier sets a `ViewState` to `active` when the view appear
 and to `inactive` when it disappears, either through a `Binding<ViewState>` or
 through a key path of an object.
 
+## Documentation
+
+The API reference and the articles, including a walkthrough of an app split in modules, are
+on [Swift Package Index](https://swiftpackageindex.com/o-nnerb/navigation-kit/documentation/navigationkit).
+The same catalog is in `Sources/NavigationKit/NavigationKit.docc`, and Xcode builds it with
+**Product > Build Documentation**.
+
 ## Contributing
 
 Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.

@@ -87,16 +87,30 @@ final class SceneActionSubscription<Action: Hashable> {
 
 extension View {
 
-    /// Adds a scene action to the view.
+    /// Handles the actions of a type that are sent on the scene.
     ///
-    /// Use `sceneAction` to add an action to the view that should trigger when a specific
-    /// type of `Action` is dispatched on the scene.
+    /// The closure runs on the main actor every time a view calls
+    /// ``SwiftUICore/EnvironmentValues/sceneAction`` with an action of the type, from anywhere below
+    /// the nearest ``SwiftUICore/View/sceneActionEnabled()``.
     ///
-    /// - Parameter
-    ///    - actionType: The type of the `Action` that should trigger the action.
-    ///    - action: A closure that executes when the `actionType` is dispatched.
+    /// ```swift
+    /// ContentView()
+    ///     .sceneAction(for: SessionAction.self) { action in
+    ///         switch action {
+    ///         case .logout:
+    ///             session.signOut()
+    ///         }
+    ///     }
+    /// ```
     ///
-    /// - Returns: A modified version of this view that includes the action.
+    /// The handler keeps listening while the view is covered by another one, such as the root of a
+    /// stack with a destination on top, and stops when the view leaves the hierarchy.
+    ///
+    /// - Parameters:
+    ///    - actionType: The type of the action to handle.
+    ///    - action: A closure that runs for each action of the type.
+    ///
+    /// - Returns: A view that handles the actions.
     public func sceneAction<Action: Hashable>(
         for actionType: Action.Type,
         perform action: @escaping @MainActor (Action) -> Void
