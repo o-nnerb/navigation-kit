@@ -3,7 +3,8 @@
 
 import SwiftUI
 
-/// A type that transforms a scene action to a specific item.
+/// Passed to the closure of ``SwiftUICore/View/sceneActionTransformer(for:_:)`` to send another action
+/// in response to the one received.
 public struct SceneActionTransformer {
 
     private let state: State
@@ -12,9 +13,12 @@ public struct SceneActionTransformer {
         state = .init()
     }
 
-    /// Transforms the scene action for the specified item.
+    /// Sends the item as an action of the scene.
     ///
-    /// - Parameter item: The item transformed.
+    /// The action that was received is not removed from the scene, so its other handlers still get it.
+    /// Not calling this method sends nothing.
+    ///
+    /// - Parameter item: The action to send.
     public func callAsFunction<Item: Hashable>(_ item: Item) {
         state.send(item)
     }

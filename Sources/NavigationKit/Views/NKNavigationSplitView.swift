@@ -13,6 +13,20 @@ import SwiftUI
 /// state and perform the navigation. It also sets the `navigationAction` environment value
 /// to a `NavigationAction` object that provides a way for child views to push new views onto
 /// the stack.
+///
+/// ```swift
+/// NKNavigationSplitView {
+///     SidebarView()
+/// } detail: {
+///     DetailView()
+///         .nkNavigationDestination(for: ItemScene.self) {
+///             ItemView($0)
+///         }
+/// }
+/// ```
+///
+/// Only the detail column has a ``SwiftUICore/EnvironmentValues/navigationAction``. The sidebar and the content
+/// columns are outside of the stack, so reading it from there stops the program.
 public struct NKNavigationSplitView<Sidebar: View, Content: View, Detail: View>: View {
 
     @StateObject var storage = NavigationStateStorage()
@@ -22,6 +36,7 @@ public struct NKNavigationSplitView<Sidebar: View, Content: View, Detail: View>:
         self.initialized = initialized
     }
 
+    /// The split view with its columns.
     public var body: some View {
         Group {
             switch initialized {

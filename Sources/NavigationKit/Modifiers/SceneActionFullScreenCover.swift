@@ -53,11 +53,15 @@ extension SceneActionFullScreenCover {
 @MainActor
 extension View {
 
-    /// Presents a full-screen cover when an action of the specified type is received.
+    /// Presents a full-screen cover when an action of the given type is sent on the scene.
+    ///
+    /// Not available on macOS. The content of the cover is the view registered with ``SwiftUICore/View/viewResolver(for:_:)`` for the
+    /// type of the scene that `reducer` returns.
+    ///
     /// - Parameters:
-    ///    - actionType: The type of action to listen for.
-    ///    - reducer: The reducer function that will be used to update the scene's state based on the action received.
-    /// - Returns: A view that will present a full-screen cover when the specified action is received.
+    ///    - actionType: The type of the action that presents the cover.
+    ///    - reducer: Maps the action to the model of the view to present.
+    /// - Returns: A view that presents a cover for each action.
     public func sceneActionFullScreenCover<Action: Hashable, Scene: Hashable>(
         for actionType: Action.Type,
         reducer: @escaping (Action) -> Scene
@@ -65,9 +69,13 @@ extension View {
         modifier(SceneActionFullScreenCover(reducer: reducer))
     }
 
-    /// Presents a full-screen cover when an action of the specified type is received.
-    /// - Parameter actionType: The type of action to listen for.
-    /// - Returns: A view that will present a full-screen cover when the specified action is received.
+    /// Presents a full-screen cover when an action of the given type is sent on the scene.
+    ///
+    /// The action itself is the model resolved with ``SwiftUICore/View/viewResolver(for:_:)``, so a view must
+    /// be registered for the action type.
+    ///
+    /// - Parameter actionType: The type of the action that presents the cover.
+    /// - Returns: A view that presents a cover for each action.
     public func sceneActionFullScreenCover<Action: Hashable>(
         for actionType: Action.Type
     ) -> some View {

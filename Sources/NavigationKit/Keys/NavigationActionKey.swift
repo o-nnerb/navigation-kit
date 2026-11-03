@@ -17,7 +17,23 @@ extension EnvironmentValues {
         set { self[NavigationActionKey.self] = newValue }
     }
 
-    /// The navigation action associated with the environment.
+    /// The action that changes the navigation stack the view belongs to.
+    ///
+    /// The value is set by ``NKNavigationStack`` and, for the views of its detail column, by
+    /// ``NKNavigationSplitView``. Reading it from a view that is not inside one of them is a
+    /// programmer error and stops the program.
+    ///
+    /// ```swift
+    /// struct ProfileButton: View {
+    ///     @Environment(\.navigationAction) private var navigationAction
+    ///
+    ///     var body: some View {
+    ///         Button("Profile") {
+    ///             navigationAction.append(ProfileScene())
+    ///         }
+    ///     }
+    /// }
+    /// ```
     public var navigationAction: NavigationAction {
         guard let navigationAction = _navigationAction else {
             fatalError()

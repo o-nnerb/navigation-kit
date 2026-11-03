@@ -3,7 +3,11 @@
 
 import Foundation
 
-/// A type that transforms a navigation destination to a specific item.
+/// Passed to the closure of ``SwiftUICore/View/navigationDestinationTransformer(for:closure:)`` to
+/// choose the item that replaces the one given to the ``NavigationAction``.
+///
+/// The operation is the same one that was requested: if the call was `append(_:)`, the item is
+/// appended, and if it was `setItems(_:)`, the items are set.
 @MainActor
 public struct NavigationDestinationTransformer: Sendable {
 
@@ -13,16 +17,20 @@ public struct NavigationDestinationTransformer: Sendable {
         state = .init(action)
     }
 
-    /// Transforms the navigation destination for the specified item.
+    /// Uses the item in place of the original one.
     ///
-    /// - Parameter item: The item transformed.
+    /// When it is not called, the original item is used.
+    ///
+    /// - Parameter item: The item to use.
     public func callAsFunction<Item: Hashable & Sendable>(_ item: Item) {
         state.send(item)
     }
 
-    /// Transforms the navigation destination for the specified `Codable` item.
+    /// Uses the `Codable` item in place of the original one.
     ///
-    /// - Parameter item: The item transformed.
+    /// Prefer this overload when the stack needs to be saved with ``NavigationAction/codable``.
+    ///
+    /// - Parameter item: The item to use.
     public func callAsFunction<Item: Hashable & Codable & Sendable>(_ item: Item) {
         state.send(item)
     }

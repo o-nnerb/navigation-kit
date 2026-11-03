@@ -51,7 +51,16 @@ extension ViewStateModifier {
 
 extension View {
 
-    /// Sets the state of the view to active or inactive, based on the given binding.
+    /// Sets the binding to `active` when the view appears and to `inactive` when it disappears.
+    ///
+    /// ```swift
+    /// @State private var viewState = ViewState.inactive
+    ///
+    /// var body: some View {
+    ///     List(items) { Text($0.name) }
+    ///         .viewState($viewState)
+    /// }
+    /// ```
     ///
     /// - Parameter viewState: A binding to a `ViewState` value that determines
     /// the state of the view.
@@ -66,7 +75,11 @@ extension View {
         }
     }
 
-    /// Sets the state of the view to active or inactive, based on the given object's key path.
+    /// Sets the property of the object to `active` when the view appears and to `inactive` when it
+    /// disappears.
+    ///
+    /// It is meant for a view model that decides what to do when its screen shows up, such as loading
+    /// the data.
     ///
     /// - Parameters:
     ///    - object: An object that conforms to `AnyObject`.
