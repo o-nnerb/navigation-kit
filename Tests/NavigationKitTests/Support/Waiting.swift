@@ -15,18 +15,15 @@ func waitUntil(_ condition: () -> Bool) async {
     }
 }
 
-/// Polls `condition` for up to thirty seconds, keeping `window` the key window meanwhile.
+/// Polls `condition` for up to three seconds, keeping `window` the key window meanwhile.
 ///
 /// The tests run in parallel and every window they host becomes the key window. On visionOS a sheet
 /// or a popover only finishes appearing while the window that presents it is the key one, so a
 /// presentation started while another test takes the key window stays on screen without its content
 /// ever appearing. Taking the key window back lets it finish.
-///
-/// It is long because the first presentation on a simulator that has just booted can take several
-/// seconds. It returns as soon as the condition holds, so the limit only matters when a test fails.
 @MainActor
 func waitUntil(keeping window: AnyObject, _ condition: () -> Bool) async {
-    for _ in 0..<3000 where !condition() {
+    for _ in 0..<300 where !condition() {
         #if canImport(UIKit) && !os(watchOS)
         if let window = window as? UIWindow, !window.isKeyWindow {
             window.makeKey()
