@@ -7,8 +7,10 @@ import Testing
 
 @testable import NavigationKit
 
+// Serialized because each test that waits for a presentation takes the key window back while it waits
+// (see `waitUntil(keeping:)`); run together they would take it from one another.
 @MainActor
-@Suite struct SceneActionPresentationTests {
+@Suite(.serialized) struct SceneActionPresentationTests {
 
     @MainActor
     private final class Recorder {
