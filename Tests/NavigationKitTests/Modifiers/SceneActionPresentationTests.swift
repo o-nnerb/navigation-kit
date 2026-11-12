@@ -20,6 +20,7 @@ import Testing
         var titles = [String]()
     }
 
+    #if os(macOS)
     /// Dismisses the presentation it is in shortly after it appears, once the presentation is complete.
     private struct Dismisser: View {
 
@@ -34,6 +35,7 @@ import Testing
                 }
         }
     }
+    #endif
 
     private struct Sender<Action: Hashable>: View {
 
@@ -174,6 +176,9 @@ import Testing
         withExtendedLifetime(window) {}
     }
 
+    // `dismiss()` of the environment is the only way these tests close a presentation, and it
+    // reports the dismissal back to the modifiers on macOS only.
+    #if os(macOS)
     @Test func sheet_whenDismissed_shouldPerformOnDismiss() async throws {
         // Given
         let recorder = Recorder()
@@ -209,6 +214,7 @@ import Testing
         #expect(recorder.dismissed == 1)
         withExtendedLifetime(window) {}
     }
+    #endif
 
     // MARK: - Popover
 
@@ -253,6 +259,7 @@ import Testing
         withExtendedLifetime(window) {}
     }
 
+    #if os(macOS)
     @Test func popover_whenDismissed_shouldPerformOnDismiss() async throws {
         // Given
         let recorder = Recorder()
@@ -271,6 +278,11 @@ import Testing
         withExtendedLifetime(window) {}
     }
     #endif
+    #endif
+
+    #if os(macOS)
+    // The system draws alerts and dialogs, so these check that the closures run with the action. They
+    // run on macOS, where the window hosts them.
 
     // MARK: - Alert
 
@@ -367,5 +379,6 @@ import Testing
         #expect(recorder.titles.contains("5"))
         withExtendedLifetime(window) {}
     }
+    #endif
 }
 #endif
