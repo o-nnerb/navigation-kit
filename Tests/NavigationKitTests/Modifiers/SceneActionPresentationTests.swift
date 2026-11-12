@@ -149,7 +149,7 @@ import Testing
                 }
                 .sceneActionEnabled()
         )
-        await waitUntil { !recorder.presented.isEmpty }
+        await waitUntil(keeping: window) { !recorder.presented.isEmpty }
 
         // Then
         #expect(recorder.presented == [8])
@@ -169,7 +169,7 @@ import Testing
                 }
                 .sceneActionEnabled()
         )
-        await waitUntil { !recorder.presented.isEmpty }
+        await waitUntil(keeping: window) { !recorder.presented.isEmpty }
 
         // Then
         #expect(recorder.presented == [9])
@@ -232,7 +232,7 @@ import Testing
                 }
                 .sceneActionEnabled()
         )
-        await waitUntil { !recorder.presented.isEmpty }
+        await waitUntil(keeping: window) { !recorder.presented.isEmpty }
 
         // Then
         #expect(recorder.presented == [7])
@@ -252,7 +252,7 @@ import Testing
                 }
                 .sceneActionEnabled()
         )
-        await waitUntil { !recorder.presented.isEmpty }
+        await waitUntil(keeping: window) { !recorder.presented.isEmpty }
 
         // Then
         #expect(recorder.presented == [6])
