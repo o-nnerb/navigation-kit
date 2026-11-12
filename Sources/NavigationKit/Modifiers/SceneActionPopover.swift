@@ -11,15 +11,18 @@ private struct SceneActionPopover<Action: Hashable, Scene: Hashable>: ViewModifi
 
     private let attachmentAnchor: PopoverAttachmentAnchor
     private let arrowEdge: Edge
+    private let onDismiss: (() -> Void)?
     private let reducer: (Action) -> Scene
 
     init(
         attachmentAnchor: PopoverAttachmentAnchor,
         arrowEdge: Edge,
+        onDismiss: (() -> Void)?,
         reducer: @escaping (Action) -> Scene
     ) {
         self.attachmentAnchor = attachmentAnchor
         self.arrowEdge = arrowEdge
+        self.onDismiss = onDismiss
         self.reducer = reducer
     }
 
@@ -33,6 +36,12 @@ private struct SceneActionPopover<Action: Hashable, Scene: Hashable>: ViewModifi
                     reducer: reducer
                 )
             )
+            // `popover` has no `onDismiss`, so the closure runs when the presented action is cleared.
+            .onValueChange(of: presented?.id) { id in
+                if id == nil {
+                    onDismiss?()
+                }
+            }
             .sceneAction(for: Action.self) {
                 presented = .init(item: $0)
             }
@@ -79,6 +88,7 @@ extension View {
     ///    - actionType: The type of the action that presents the popover.
     ///    - attachmentAnchor: The anchor to which the popover is attached.
     ///    - arrowEdge: The edge on which the popover's arrow is placed.
+    ///    - onDismiss: A closure that runs after the popover is dismissed.
     ///    - reducer: Maps the action to the model of the view to present.
     ///
     /// - Returns: A view that presents a popover for each action.
@@ -86,12 +96,14 @@ extension View {
         for actionType: Action.Type,
         attachmentAnchor: PopoverAttachmentAnchor = .rect(.bounds),
         arrowEdge: Edge = .top,
+        onDismiss: (() -> Void)? = nil,
         reducer: @escaping (Action) -> Scene
     ) -> some View {
         modifier(
             SceneActionPopover(
                 attachmentAnchor: attachmentAnchor,
                 arrowEdge: arrowEdge,
+                onDismiss: onDismiss,
                 reducer: reducer
             )
         )
@@ -106,17 +118,20 @@ extension View {
     ///    - actionType: The type of the action that presents the popover.
     ///    - attachmentAnchor: The anchor to which the popover is attached.
     ///    - arrowEdge: The edge on which the popover's arrow is placed.
+    ///    - onDismiss: A closure that runs after the popover is dismissed.
     ///
     /// - Returns: A view that presents a popover for each action.
     public func sceneActionPopover<Action: Hashable>(
         for actionType: Action.Type,
         attachmentAnchor: PopoverAttachmentAnchor = .rect(.bounds),
-        arrowEdge: Edge = .top
+        arrowEdge: Edge = .top,
+        onDismiss: (() -> Void)? = nil
     ) -> some View {
         sceneActionPopover(
             for: actionType,
             attachmentAnchor: attachmentAnchor,
             arrowEdge: arrowEdge,
+            onDismiss: onDismiss,
             reducer: { $0 }
         )
     }

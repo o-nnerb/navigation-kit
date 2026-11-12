@@ -238,6 +238,23 @@ ContentView()
     .sceneActionFullScreenCover(for: ThirdModel.self)
 ```
 
+The sheet, the popover and the full-screen cover take an `onDismiss` closure.
+For the system alert and confirmation dialog, which have no view to resolve,
+`sceneActionAlert` and `sceneActionConfirmationDialog` receive the action in each
+closure that describes them:
+
+```swift
+ContentView()
+    .sceneActionAlert(for: DeleteRequest.self) { request in
+        Text("Delete \(request.name)?")
+    } actions: { request in
+        Button("Delete", role: .destructive) { store.delete(request.id) }
+        Button("Cancel", role: .cancel) {}
+    } message: { _ in
+        Text("This can't be undone.")
+    }
+```
+
 Use `sceneActionTransformer(for:closure:)` to map one action type into another
 and `navigationDestinationTransformer(for:closure:)` to map an item type into a
 destination registered with `nkNavigationDestination(for:destination:)`.

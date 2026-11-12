@@ -8,9 +8,14 @@ private struct SceneActionSheet<Action: Hashable, Scene: Hashable>: ViewModifier
 
     @State var presented: Identified<Action>?
 
+    private let onDismiss: (() -> Void)?
     private let reducer: (Action) -> Scene
 
-    init(reducer: @escaping (Action) -> Scene) {
+    init(
+        onDismiss: (() -> Void)?,
+        reducer: @escaping (Action) -> Scene
+    ) {
+        self.onDismiss = onDismiss
         self.reducer = reducer
     }
 
@@ -19,6 +24,7 @@ private struct SceneActionSheet<Action: Hashable, Scene: Hashable>: ViewModifier
             .modifier(
                 SheetModifier(
                     presented: $presented,
+                    onDismiss: onDismiss,
                     reducer: reducer
                 )
             )
@@ -37,11 +43,12 @@ extension SceneActionSheet {
 
         @Binding var presented: Identified<Action>?
 
+        let onDismiss: (() -> Void)?
         let reducer: (Action) -> Scene
 
         func body(content: Content) -> some View {
             content
-                .sheet(item: $presented) {
+                .sheet(item: $presented, onDismiss: onDismiss) {
                     viewResolver(reducer($0.item))
                         .environment(\.sceneAction, sceneAction)
                 }
@@ -66,14 +73,16 @@ extension View {
     ///
     /// - Parameters:
     ///    - actionType: The type of the action that presents the sheet.
+    ///    - onDismiss: A closure that runs after the sheet is dismissed.
     ///    - reducer: Maps the action to the model of the view to present.
     ///
     /// - Returns: A view that presents a sheet for each action.
     public func sceneActionSheet<Action: Hashable, Scene: Hashable>(
         for actionType: Action.Type,
+        onDismiss: (() -> Void)? = nil,
         reducer: @escaping (Action) -> Scene
     ) -> some View {
-        modifier(SceneActionSheet(reducer: reducer))
+        modifier(SceneActionSheet(onDismiss: onDismiss, reducer: reducer))
     }
 
     /// Presents a sheet when an action of the given type is sent on the scene.
@@ -81,14 +90,18 @@ extension View {
     /// The action itself is the model resolved with ``SwiftUICore/View/viewResolver(for:_:)``, so a view must
     /// be registered for the action type.
     ///
-    /// - Parameter actionType: The type of the action that presents the sheet.
+    /// - Parameters:
+    ///    - actionType: The type of the action that presents the sheet.
+    ///    - onDismiss: A closure that runs after the sheet is dismissed.
     ///
     /// - Returns: A view that presents a sheet for each action.
     public func sceneActionSheet<Action: Hashable>(
-        for actionType: Action.Type
+        for actionType: Action.Type,
+        onDismiss: (() -> Void)? = nil
     ) -> some View {
         sceneActionSheet(
             for: actionType,
+            onDismiss: onDismiss,
             reducer: { $0 }
         )
     }

@@ -51,10 +51,14 @@ It runs on iOS 15, tvOS 15, macOS 12, watchOS 9 and visionOS 1. On the versions 
 - ``SwiftUICore/EnvironmentValues/sceneAction``
 - ``SwiftUICore/View/sceneActionEnabled()``
 - ``SwiftUICore/View/sceneAction(for:perform:)``
-- ``SwiftUICore/View/sceneActionSheet(for:reducer:)``
-- ``SwiftUICore/View/sceneActionSheet(for:)``
-- ``SwiftUICore/View/sceneActionPopover(for:attachmentAnchor:arrowEdge:reducer:)``
-- ``SwiftUICore/View/sceneActionPopover(for:attachmentAnchor:arrowEdge:)``
+- ``SwiftUICore/View/sceneActionSheet(for:onDismiss:reducer:)``
+- ``SwiftUICore/View/sceneActionSheet(for:onDismiss:)``
+- ``SwiftUICore/View/sceneActionPopover(for:attachmentAnchor:arrowEdge:onDismiss:reducer:)``
+- ``SwiftUICore/View/sceneActionPopover(for:attachmentAnchor:arrowEdge:onDismiss:)``
+- ``SwiftUICore/View/sceneActionAlert(for:title:actions:message:)``
+- ``SwiftUICore/View/sceneActionAlert(for:title:actions:)``
+- ``SwiftUICore/View/sceneActionConfirmationDialog(for:titleVisibility:title:actions:message:)``
+- ``SwiftUICore/View/sceneActionConfirmationDialog(for:titleVisibility:title:actions:)``
 
 ### Translating actions and items
 
