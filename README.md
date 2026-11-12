@@ -73,10 +73,11 @@ struct ContentView: View {
 `NKNavigationStack` replaces the `NavigationPath` with a `NavigationAction`
 that allows developers to better manipulate the currently stacked views.
 
-⚠️ The downside of this implementation is the removal of the decode option that
-Apple offers. You can still implement your own version of `NavigationStack`
-with `NavigationPath` and use NavigationKit without the `NavigationAction`
-environment.
+The decode option that `NavigationPath` offers is kept: `navigationAction.codable`
+returns a `Codable` representation of the stack that you can save and pass back to
+`NKNavigationStack` to restore it (see below). It only exists while every item in the
+stack is `Codable`, so use the `Codable` overloads of `append(_:)` and `setItems(_:)`
+for the items that must survive a relaunch.
 
 ```swift
 struct FirstView: View {
