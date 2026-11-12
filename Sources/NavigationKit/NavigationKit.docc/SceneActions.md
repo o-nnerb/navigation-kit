@@ -79,34 +79,43 @@ Several views can handle the same type, and each one receives every action.
 
 ### Show an alert from anywhere
 
-A modifier that owns the alert and handles the action keeps the rest of the app from knowing it exists:
+``SwiftUICore/View/sceneActionAlert(for:title:actions:message:)`` owns the alert and presents it for each
+action of a type, which keeps the rest of the app from knowing it exists. The alert is described like
+SwiftUI's `alert`, with one difference: each closure receives the action that was sent.
 
 ```swift
 struct Failure: Hashable {
     let message: String
 }
 
-struct FailureAlert: ViewModifier {
-    @State private var failure: Failure?
-
-    func body(content: Content) -> some View {
-        content
-            .sceneAction(for: Failure.self) { failure = $0 }
-            .alert(
-                "Something went wrong",
-                isPresented: Binding(
-                    get: { failure != nil },
-                    set: { if !$0 { failure = nil } }
-                ),
-                actions: { Button("OK") {} },
-                message: { Text(failure?.message ?? "") }
-            )
+RootView()
+    .sceneActionAlert(for: Failure.self) { _ in
+        Text("Something went wrong")
+    } actions: { _ in
+        Button("OK") {}
+    } message: { failure in
+        Text(failure.message)
     }
+    .sceneActionEnabled()
+```
+
+Apply it once, near the root. Any screen reports with `sceneAction(Failure(message: "No connection"))`.
+The title is a `Text`, and the overload without `message` leaves the message out.
+``SwiftUICore/View/sceneActionConfirmationDialog(for:titleVisibility:title:actions:message:)`` takes the
+same arguments and presents a confirmation dialog instead.
+
+A button can also send an action, so the alert does not have to know what happens next:
+
+```swift
+.sceneActionAlert(for: DeleteRequest.self) { request in
+    Text("Delete \(request.name)?")
+} actions: { request in
+    Button("Delete", role: .destructive) { sceneAction(DeleteConfirmed(id: request.id)) }
+    Button("Cancel", role: .cancel) {}
 }
 ```
 
-Apply it once, near the root, with `.modifier(FailureAlert())`. Any screen reports with
-`sceneAction(Failure(message: "No connection"))`.
+where `sceneAction` is the `@Environment(\.sceneAction)` value of the view that applies the modifier.
 
 ### Present a view
 
@@ -126,10 +135,10 @@ RootView()
 The environment flows from the outside in, so the resolver and the scene have to be applied after
 the presentation modifier, as above. The other way around, the modifier does not see them.
 
-``SwiftUICore/View/sceneActionSheet(for:reducer:)``, ``SwiftUICore/View/sceneActionPopover(for:attachmentAnchor:arrowEdge:reducer:)``
-and `sceneActionFullScreenCover(for:reducer:)` (not on macOS) take a closure that turns the action
+``SwiftUICore/View/sceneActionSheet(for:onDismiss:reducer:)``, ``SwiftUICore/View/sceneActionPopover(for:attachmentAnchor:arrowEdge:onDismiss:reducer:)``
+and `sceneActionFullScreenCover(for:onDismiss:reducer:)` (not on macOS) take a closure that turns the action
 into the model to present. The overloads without `reducer` present the action itself, so a view must
-be registered for the action type.
+be registered for the action type. `onDismiss` runs after the presentation is dismissed.
 
 ### Translate an action
 
@@ -160,6 +169,17 @@ nothing. <doc:ModularApps> uses this to connect modules.
 - ``SwiftUICore/EnvironmentValues/sceneAction``
 - ``SwiftUICore/View/sceneActionEnabled()``
 - ``SwiftUICore/View/sceneAction(for:perform:)``
+
+### Presenting
+
+- ``SwiftUICore/View/sceneActionSheet(for:onDismiss:reducer:)``
+- ``SwiftUICore/View/sceneActionSheet(for:onDismiss:)``
+- ``SwiftUICore/View/sceneActionPopover(for:attachmentAnchor:arrowEdge:onDismiss:reducer:)``
+- ``SwiftUICore/View/sceneActionPopover(for:attachmentAnchor:arrowEdge:onDismiss:)``
+- ``SwiftUICore/View/sceneActionAlert(for:title:actions:message:)``
+- ``SwiftUICore/View/sceneActionAlert(for:title:actions:)``
+- ``SwiftUICore/View/sceneActionConfirmationDialog(for:titleVisibility:title:actions:message:)``
+- ``SwiftUICore/View/sceneActionConfirmationDialog(for:titleVisibility:title:actions:)``
 
 ### Translating
 

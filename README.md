@@ -73,10 +73,11 @@ struct ContentView: View {
 `NKNavigationStack` replaces the `NavigationPath` with a `NavigationAction`
 that allows developers to better manipulate the currently stacked views.
 
-⚠️ The downside of this implementation is the removal of the decode option that
-Apple offers. You can still implement your own version of `NavigationStack`
-with `NavigationPath` and use NavigationKit without the `NavigationAction`
-environment.
+The decode option that `NavigationPath` offers is kept: `navigationAction.codable`
+returns a `Codable` representation of the stack that you can save and pass back to
+`NKNavigationStack` to restore it (see below). It only exists while every item in the
+stack is `Codable`, so use the `Codable` overloads of `append(_:)` and `setItems(_:)`
+for the items that must survive a relaunch.
 
 ```swift
 struct FirstView: View {
@@ -235,6 +236,23 @@ ContentView()
     .sceneActionSheet(for: SomeModel.self)
     .sceneActionPopover(for: OtherModel.self)
     .sceneActionFullScreenCover(for: ThirdModel.self)
+```
+
+The sheet, the popover and the full-screen cover take an `onDismiss` closure.
+For the system alert and confirmation dialog, which have no view to resolve,
+`sceneActionAlert` and `sceneActionConfirmationDialog` receive the action in each
+closure that describes them:
+
+```swift
+ContentView()
+    .sceneActionAlert(for: DeleteRequest.self) { request in
+        Text("Delete \(request.name)?")
+    } actions: { request in
+        Button("Delete", role: .destructive) { store.delete(request.id) }
+        Button("Cancel", role: .cancel) {}
+    } message: { _ in
+        Text("This can't be undone.")
+    }
 ```
 
 Use `sceneActionTransformer(for:closure:)` to map one action type into another

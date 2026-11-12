@@ -9,9 +9,14 @@ private struct SceneActionFullScreenCover<Action: Hashable, Scene: Hashable>: Vi
 
     @State var presented: Identified<Action>?
 
+    private let onDismiss: (() -> Void)?
     private let reducer: (Action) -> Scene
 
-    init(reducer: @escaping (Action) -> Scene) {
+    init(
+        onDismiss: (() -> Void)?,
+        reducer: @escaping (Action) -> Scene
+    ) {
+        self.onDismiss = onDismiss
         self.reducer = reducer
     }
 
@@ -20,6 +25,7 @@ private struct SceneActionFullScreenCover<Action: Hashable, Scene: Hashable>: Vi
             .modifier(
                 FullScreenCoverModifier(
                     presented: $presented,
+                    onDismiss: onDismiss,
                     reducer: reducer
                 )
             )
@@ -38,11 +44,12 @@ extension SceneActionFullScreenCover {
 
         @Binding var presented: Identified<Action>?
 
+        let onDismiss: (() -> Void)?
         let reducer: (Action) -> Scene
 
         func body(content: Content) -> some View {
             content
-                .sheet(item: $presented) {
+                .fullScreenCover(item: $presented, onDismiss: onDismiss) {
                     viewResolver(reducer($0.item))
                         .environment(\.sceneAction, sceneAction)
                 }
@@ -60,13 +67,15 @@ extension View {
     ///
     /// - Parameters:
     ///    - actionType: The type of the action that presents the cover.
+    ///    - onDismiss: A closure that runs after the cover is dismissed.
     ///    - reducer: Maps the action to the model of the view to present.
     /// - Returns: A view that presents a cover for each action.
     public func sceneActionFullScreenCover<Action: Hashable, Scene: Hashable>(
         for actionType: Action.Type,
+        onDismiss: (() -> Void)? = nil,
         reducer: @escaping (Action) -> Scene
     ) -> some View {
-        modifier(SceneActionFullScreenCover(reducer: reducer))
+        modifier(SceneActionFullScreenCover(onDismiss: onDismiss, reducer: reducer))
     }
 
     /// Presents a full-screen cover when an action of the given type is sent on the scene.
@@ -74,13 +83,17 @@ extension View {
     /// The action itself is the model resolved with ``SwiftUICore/View/viewResolver(for:_:)``, so a view must
     /// be registered for the action type.
     ///
-    /// - Parameter actionType: The type of the action that presents the cover.
+    /// - Parameters:
+    ///    - actionType: The type of the action that presents the cover.
+    ///    - onDismiss: A closure that runs after the cover is dismissed.
     /// - Returns: A view that presents a cover for each action.
     public func sceneActionFullScreenCover<Action: Hashable>(
-        for actionType: Action.Type
+        for actionType: Action.Type,
+        onDismiss: (() -> Void)? = nil
     ) -> some View {
         sceneActionFullScreenCover(
             for: actionType,
+            onDismiss: onDismiss,
             reducer: { $0 }
         )
     }

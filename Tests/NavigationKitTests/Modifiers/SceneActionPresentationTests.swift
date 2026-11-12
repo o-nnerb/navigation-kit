@@ -16,7 +16,26 @@ import Testing
         var strings = [String]()
         var sceneActions = [ObjectIdentifier]()
         var presented = [Int]()
+        var dismissed = 0
+        var titles = [String]()
     }
+
+    #if os(macOS)
+    /// Dismisses the presentation it is in shortly after it appears, once the presentation is complete.
+    private struct Dismisser: View {
+
+        @Environment(\.dismiss) var dismiss
+
+        var body: some View {
+            Color.clear
+                .frame(width: 50, height: 50)
+                .task {
+                    try? await Task.sleep(nanoseconds: 300_000_000)
+                    dismiss()
+                }
+        }
+    }
+    #endif
 
     private struct Sender<Action: Hashable>: View {
 
@@ -117,6 +136,9 @@ import Testing
 
     // MARK: - Sheet
 
+    // The tests that wait for a presented view run on iOS and macOS. On the tvOS and visionOS simulators of
+    // the CI the presented view never appears, although it does on a local simulator.
+    #if !os(tvOS) && !os(visionOS)
     @Test func sheet_whenActionIsSent_shouldPresentTheResolvedView() async throws {
         // Given
         let recorder = Recorder()
@@ -157,9 +179,51 @@ import Testing
         withExtendedLifetime(window) {}
     }
 
+    // `dismiss()` of the environment is the only way these tests close a presentation, and it
+    // reports the dismissal back to the modifiers on macOS only.
+    #endif
+
+    #if os(macOS)
+    @Test func sheet_whenDismissed_shouldPerformOnDismiss() async throws {
+        // Given
+        let recorder = Recorder()
+
+        // When
+        let window = hostInWindow(
+            Sender(action: 1)
+                .sceneActionSheet(for: Int.self, onDismiss: { recorder.dismissed += 1 })
+                .viewResolver(for: Int.self) { _ in Dismisser() }
+                .sceneActionEnabled()
+        )
+        await waitUntil { recorder.dismissed > 0 }
+
+        // Then
+        #expect(recorder.dismissed == 1)
+        withExtendedLifetime(window) {}
+    }
+
+    @Test func sheet_whenReducerAndOnDismiss_shouldPerformOnDismiss() async throws {
+        // Given
+        let recorder = Recorder()
+
+        // When
+        let window = hostInWindow(
+            Sender(action: "abc")
+                .sceneActionSheet(for: String.self, onDismiss: { recorder.dismissed += 1 }) { $0.count }
+                .viewResolver(for: Int.self) { _ in Dismisser() }
+                .sceneActionEnabled()
+        )
+        await waitUntil { recorder.dismissed > 0 }
+
+        // Then
+        #expect(recorder.dismissed == 1)
+        withExtendedLifetime(window) {}
+    }
+    #endif
+
     // MARK: - Popover
 
-    #if !os(tvOS)
+    #if !os(tvOS) && !os(visionOS)
     @Test func popover_whenActionIsSent_shouldPresentTheResolvedView() async throws {
         // Given
         let recorder = Recorder()
@@ -197,6 +261,127 @@ import Testing
 
         // Then
         #expect(recorder.presented == [6])
+        withExtendedLifetime(window) {}
+    }
+
+    #if os(macOS)
+    @Test func popover_whenDismissed_shouldPerformOnDismiss() async throws {
+        // Given
+        let recorder = Recorder()
+
+        // When
+        let window = hostInWindow(
+            Sender(action: 3)
+                .sceneActionPopover(for: Int.self, onDismiss: { recorder.dismissed += 1 })
+                .viewResolver(for: Int.self) { _ in Dismisser() }
+                .sceneActionEnabled()
+        )
+        await waitUntil { recorder.dismissed > 0 }
+
+        // Then
+        #expect(recorder.dismissed == 1)
+        withExtendedLifetime(window) {}
+    }
+    #endif
+    #endif
+
+    #if os(macOS)
+    // The system draws alerts and dialogs, so these check that the closures run with the action. They
+    // run on macOS, where the window hosts them.
+
+    // MARK: - Alert
+
+    @Test func alert_whenActionIsSent_shouldBuildItFromTheAction() async throws {
+        // Given
+        let recorder = Recorder()
+
+        // When
+        let window = hostInWindow(
+            Sender(action: "file")
+                .sceneActionAlert(for: String.self) { action in
+                    recorder.titles.append(action)
+                    return Text(action)
+                } actions: { action in
+                    Button("Delete \(action)") {}
+                } message: { action in
+                    Text(action)
+                }
+                .sceneActionEnabled()
+        )
+        await waitUntil { recorder.titles.contains("file") }
+
+        // Then
+        #expect(recorder.titles.contains("file"))
+        withExtendedLifetime(window) {}
+    }
+
+    @Test func alert_whenWithoutMessage_shouldBuildItFromTheAction() async throws {
+        // Given
+        let recorder = Recorder()
+
+        // When
+        let window = hostInWindow(
+            Sender(action: 12)
+                .sceneActionAlert(for: Int.self) { action in
+                    recorder.titles.append("\(action)")
+                    return Text(verbatim: "\(action)")
+                } actions: { _ in
+                    Button("OK") {}
+                }
+                .sceneActionEnabled()
+        )
+        await waitUntil { recorder.titles.contains("12") }
+
+        // Then
+        #expect(recorder.titles.contains("12"))
+        withExtendedLifetime(window) {}
+    }
+
+    // MARK: - Confirmation dialog
+
+    @Test func confirmationDialog_whenActionIsSent_shouldBuildItFromTheAction() async throws {
+        // Given
+        let recorder = Recorder()
+
+        // When
+        let window = hostInWindow(
+            Sender(action: "photo")
+                .sceneActionConfirmationDialog(for: String.self, titleVisibility: .visible) { action in
+                    recorder.titles.append(action)
+                    return Text(action)
+                } actions: { _ in
+                    Button("Delete", role: .destructive) {}
+                } message: { _ in
+                    Text("Message")
+                }
+                .sceneActionEnabled()
+        )
+        await waitUntil { recorder.titles.contains("photo") }
+
+        // Then
+        #expect(recorder.titles.contains("photo"))
+        withExtendedLifetime(window) {}
+    }
+
+    @Test func confirmationDialog_whenWithoutMessage_shouldBuildItFromTheAction() async throws {
+        // Given
+        let recorder = Recorder()
+
+        // When
+        let window = hostInWindow(
+            Sender(action: 5)
+                .sceneActionConfirmationDialog(for: Int.self) { action in
+                    recorder.titles.append("\(action)")
+                    return Text(verbatim: "\(action)")
+                } actions: { _ in
+                    Button("OK") {}
+                }
+                .sceneActionEnabled()
+        )
+        await waitUntil { recorder.titles.contains("5") }
+
+        // Then
+        #expect(recorder.titles.contains("5"))
         withExtendedLifetime(window) {}
     }
     #endif
