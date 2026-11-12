@@ -285,7 +285,7 @@ import Testing
                     recorder.titles.append(action)
                     return Text(action)
                 } actions: { action in
-                    Button("Delete \(action)") { }
+                    Button("Delete \(action)") {}
                 } message: { action in
                     Text(action)
                 }
@@ -309,7 +309,7 @@ import Testing
                     recorder.titles.append("\(action)")
                     return Text(verbatim: "\(action)")
                 } actions: { _ in
-                    Button("OK") { }
+                    Button("OK") {}
                 }
                 .sceneActionEnabled()
         )
@@ -333,7 +333,7 @@ import Testing
                     recorder.titles.append(action)
                     return Text(action)
                 } actions: { _ in
-                    Button("Delete", role: .destructive) { }
+                    Button("Delete", role: .destructive) {}
                 } message: { _ in
                     Text("Message")
                 }
@@ -357,7 +357,7 @@ import Testing
                     recorder.titles.append("\(action)")
                     return Text(verbatim: "\(action)")
                 } actions: { _ in
-                    Button("OK") { }
+                    Button("OK") {}
                 }
                 .sceneActionEnabled()
         )
